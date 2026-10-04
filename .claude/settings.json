@@ -19,8 +19,9 @@
       "Read(./.env.*.local)",
       "Edit(./.env)",
       "Read(./data/**)",
-      "Bash(cat .env*)",
-      "Bash(type .env*)",
+      "Bash(cat .env)",
+      "Bash(cat ./.env)",
+      "Bash(type .env)",
       "Bash(rm -rf:*)"
     ]
   },
