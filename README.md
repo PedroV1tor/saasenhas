@@ -5,6 +5,13 @@ Micro-SaaS para organizar e gerenciar senhas de forma simples e segura — feito
 - **Problema:** dificuldade para lembrar, organizar e gerenciar várias senhas; reutilização da mesma senha em vários sites.
 - **Solução:** um cofre cifrado com a senha mestra do usuário, gerador de senhas fortes, medidor de força e alerta de senhas reutilizadas.
 
+## Equipe
+- João Victor Fiuza
+- Rogger Martins
+- Isabella Nascimento
+
+Disciplina: ESW442 — Técnicas Avançadas de Construção de Software (UniRV) · Harness: **Claude Code**
+
 ## Como rodar
 ```bash
 npm install
