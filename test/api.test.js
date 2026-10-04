@@ -114,3 +114,24 @@ test('JSON inválido devolve 400', async () => {
   });
   assert.equal(res.status, 400);
 });
+
+test('favoritas pela API: marca, desmarca e filtra a listagem', async () => {
+  const token = await login('duda@exemplo.com');
+  const a = await api('POST', '/api/entradas', { token, body: { site: 'a.com', usuario: 'duda', senha: 'senha-a' } });
+  assert.equal(a.body.favorita, false);
+  await api('POST', '/api/entradas', { token, body: { site: 'b.com', usuario: 'duda', senha: 'senha-b', favorita: true } });
+
+  const marked = await api('PUT', `/api/entradas/${a.body.id}`, { token, body: { favorita: true } });
+  assert.equal(marked.status, 200);
+  assert.equal(marked.body.favorita, true);
+  assert.equal((await api('GET', `/api/entradas/${a.body.id}`, { token })).body.senha, 'senha-a');
+
+  await api('PUT', `/api/entradas/${a.body.id}`, { token, body: { favorita: false } });
+  const favorites = await api('GET', '/api/entradas?favoritas=true', { token });
+  assert.deepEqual(favorites.body.map((e) => e.site), ['b.com']);
+  assert.ok(favorites.body.every((e) => e.senha === undefined));
+  assert.equal((await api('GET', '/api/entradas', { token })).body.length, 2);
+
+  const invalid = await api('PUT', `/api/entradas/${a.body.id}`, { token, body: { favorita: 'sim' } });
+  assert.equal(invalid.status, 400);
+});

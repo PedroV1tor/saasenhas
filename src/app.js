@@ -35,14 +35,15 @@ export function createApp({ vaultService, sessions }) {
   });
 
   // Cofre
-  const toApi = ({ username, password, ...rest }) => ({
+  const toApi = ({ username, password, favorite, ...rest }) => ({
     ...rest,
     usuario: username,
+    favorita: favorite,
     ...(password !== undefined && { senha: password }),
   });
 
   app.get('/api/entradas', requireSession, async (req, res) => {
-    const entries = await vaultService.listEntries(req.session.email);
+    const entries = await vaultService.listEntries(req.session.email, { favoritesOnly: req.query.favoritas === 'true' });
     res.json(entries.map(toApi));
   });
 
@@ -52,8 +53,13 @@ export function createApp({ vaultService, sessions }) {
   });
 
   app.post('/api/entradas', requireSession, async (req, res) => {
-    const { site, usuario, senha } = req.body ?? {};
-    const entry = await vaultService.addEntry(req.session.email, req.session.key, { site, username: usuario, password: senha });
+    const { site, usuario, senha, favorita } = req.body ?? {};
+    const entry = await vaultService.addEntry(req.session.email, req.session.key, {
+      site,
+      username: usuario,
+      password: senha,
+      favorite: favorita,
+    });
     res.status(201).json(toApi(entry));
   });
 
@@ -63,11 +69,12 @@ export function createApp({ vaultService, sessions }) {
   });
 
   app.put('/api/entradas/:id', requireSession, async (req, res) => {
-    const { site, usuario, senha } = req.body ?? {};
+    const { site, usuario, senha, favorita } = req.body ?? {};
     const entry = await vaultService.updateEntry(req.session.email, req.session.key, req.params.id, {
       site,
       username: usuario,
       password: senha,
+      favorite: favorita,
     });
     res.json(toApi(entry));
   });
@@ -94,7 +101,7 @@ export function createApp({ vaultService, sessions }) {
     res.json(evaluateStrength(req.body?.senha));
   });
 
-  app.use((_req, _res, next) => next(new AppError(404, 'Rota não encontrada.')));
+  app.use((_req, _res, next) => next(new AppError(404, 'Rota não encontrada no SaaSenhas.')));
 
   // O Express reconhece o handler de erro pelos 4 parâmetros, por isso o _next fica.
   app.use((err, _req, res, _next) => {

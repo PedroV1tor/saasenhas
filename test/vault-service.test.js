@@ -95,3 +95,46 @@ test('o arquivo do cofre não guarda a senha em texto puro', async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('favorita: padrão false, marca ao criar e ao editar sem mexer na senha', async () => {
+  const { vault, email, key } = await unlockedVault();
+  const normal = await vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'senha-a' });
+  const fav = await vault.addEntry(email, key, { site: 'b.com', username: 'ana', password: 'senha-b', favorite: true });
+  assert.equal(normal.favorite, false);
+  assert.equal(fav.favorite, true);
+
+  assert.equal((await vault.updateEntry(email, key, normal.id, { favorite: true })).favorite, true);
+  assert.equal((await vault.getEntry(email, key, normal.id)).password, 'senha-a');
+  assert.equal((await vault.updateEntry(email, key, fav.id, { favorite: false })).favorite, false);
+});
+
+test('favorita não booleana é recusada', async () => {
+  const { vault, email, key } = await unlockedVault();
+  await assert.rejects(vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'x', favorite: 'sim' }), { status: 400 });
+  const created = await vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'x' });
+  await assert.rejects(vault.updateEntry(email, key, created.id, { favorite: 1 }), { status: 400 });
+});
+
+test('lista só as favoritas, sem senha', async () => {
+  const { vault, email, key } = await unlockedVault();
+  await vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'senha-a' });
+  await vault.addEntry(email, key, { site: 'b.com', username: 'ana', password: 'senha-b', favorite: true });
+
+  const favorites = await vault.listEntries(email, { favoritesOnly: true });
+  assert.deepEqual(favorites.map((e) => e.site), ['b.com']);
+  assert.doesNotMatch(JSON.stringify(favorites), /senha-b/);
+  assert.equal((await vault.listEntries(email)).length, 2);
+});
+
+test('entrada antiga sem o campo favorita aparece como false', async () => {
+  const store = createMemoryStore();
+  const { vault, email, key } = await unlockedVault(store);
+  await vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'x' });
+  const data = await store.load();
+  delete data.users[email].entries[0].favorite;
+  await store.save(data);
+
+  const [entry] = await vault.listEntries(email);
+  assert.equal(entry.favorite, false);
+  assert.deepEqual(await vault.listEntries(email, { favoritesOnly: true }), []);
+});

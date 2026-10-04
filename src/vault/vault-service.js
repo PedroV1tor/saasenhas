@@ -33,7 +33,20 @@ function requirePassword(value) {
   return value;
 }
 
-const publicEntry = ({ id, site, username, createdAt, updatedAt }) => ({ id, site, username, createdAt, updatedAt });
+function requireBoolean(value, field) {
+  if (typeof value !== 'boolean') throw new AppError(400, `O campo "${field}" precisa ser true ou false.`);
+  return value;
+}
+
+// Entradas criadas antes das favoritas não têm o campo: valem false.
+const publicEntry = ({ id, site, username, favorite = false, createdAt, updatedAt }) => ({
+  id,
+  site,
+  username,
+  favorite,
+  createdAt,
+  updatedAt,
+});
 
 export function createVaultService(store) {
   function findUser(data, email) {
@@ -76,9 +89,10 @@ export function createVaultService(store) {
       return { email: normalized, key };
     },
 
-    async listEntries(email) {
+    async listEntries(email, { favoritesOnly = false } = {}) {
       const data = await store.load();
-      return findUser(data, email).entries.map(publicEntry);
+      const entries = findUser(data, email).entries.map(publicEntry);
+      return favoritesOnly ? entries.filter((e) => e.favorite) : entries;
     },
 
     async getEntry(email, key, id) {
@@ -87,7 +101,7 @@ export function createVaultService(store) {
       return { ...publicEntry(entry), password: decrypt(entry.secret, key) };
     },
 
-    async addEntry(email, key, { site, username, password }) {
+    async addEntry(email, key, { site, username, password, favorite = false }) {
       const data = await store.load();
       const user = findUser(data, email);
       const now = new Date().toISOString();
@@ -96,6 +110,7 @@ export function createVaultService(store) {
         site: requireText(site, 'site'),
         username: requireText(username, 'usuario'),
         secret: encrypt(requirePassword(password), key),
+        favorite: requireBoolean(favorite, 'favorita'),
         createdAt: now,
         updatedAt: now,
       };
@@ -110,6 +125,7 @@ export function createVaultService(store) {
       if (changes.site !== undefined) entry.site = requireText(changes.site, 'site');
       if (changes.username !== undefined) entry.username = requireText(changes.username, 'usuario');
       if (changes.password !== undefined) entry.secret = encrypt(requirePassword(changes.password), key);
+      if (changes.favorite !== undefined) entry.favorite = requireBoolean(changes.favorite, 'favorita');
       entry.updatedAt = new Date().toISOString();
       await store.save(data);
       return publicEntry(entry);
