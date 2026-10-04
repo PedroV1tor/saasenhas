@@ -122,10 +122,10 @@ Cada ambiguidade encontrada na versão anterior desta spec, na revisão e nas va
 ### Varreduras da Aula 08
 | Varredura | Ocorrências encontradas | Decisão |
 |---|---|---|
-| **Vagueza** (rápido, fácil, intuitivo, adequado, seguro, curto…) | Versão anterior: "sessão **curta**"; "e-mail **válido**"; "guardar com **segurança**". Rascunho desta versão: "derivação de chave **lenta**". | "curta" → 15 minutos (D-05); "válido" → formato definido (D-01); "segurança" → RN-04 + Restrições com o algoritmo; "lenta" → custo fixo com parâmetros e tempo medido. |
-| **Fuga** (etc., se necessário, se possível, quando aplicável…) | Nenhuma na versão final. | — |
-| **Ator e quantidade** (voz passiva, todos, alguns, vários) | Versão anterior: "o e-mail **é normalizado**" (por quem?); "**todas** as rotas do cofre". | Sujeito explícito: "**o sistema** remove…" (RN-01); "todas as rotas" → rotas listadas no Escopo (`/api/entradas` e sub-rotas). |
-| **Implementação nos critérios** (classe, tabela, framework, biblioteca) | Nenhuma: os CA descrevem só pedido e resposta da API. scrypt e Node aparecem só em Restrições. | — |
+| **Vagueza** (rápido, fácil, intuitivo, adequado, seguro, curto…) | Versão anterior: "sessão **curta**" (objetivo); "formato **válido**" (e-mail); critério "senha mestra **curta** → 400". Rascunho desta versão: "derivação de chave **lenta**". | "sessão curta" → 15 minutos, sem renovação (D-05, RN-08); "válido" → formato definido (D-01, RN-01); "curta" → menos de 10 caracteres, com caso de borda 9/10 (CA-03); "lenta" → custo fixo com parâmetros e tempo medido. |
+| **Fuga** (etc., se necessário, se possível, quando aplicável…) | Nenhuma, nem na versão anterior nem na final. | — |
+| **Ator e quantidade** (voz passiva, todos, alguns, vários) | Versão anterior: "E-mail **é normalizado**" e "Ela **nunca é salva**" (por quem?); "**guardamos**" (nós quem?). Rascunho desta versão: "**todo** erro tem o formato…". | Sujeito explícito: "**o sistema** remove…" (RN-01) e "**o sistema** não grava…" (RN-04); "todo erro" → "cada resposta de erro". |
+| **Implementação nos critérios** (classe, tabela, framework, biblioteca) | Versão anterior: regra citando "derivados com **scrypt**" e critérios em forma de checklist, sem Dado/Quando/Então. | Os CA agora descrevem só pedido e resposta da API; scrypt e Node ficaram só em Restrições. |
 
 ### Se o código fosse apagado agora, esta spec bastaria para reconstruí-lo?
 **Para o comportamento, sim.** Rotas, campos, códigos de resposta, mensagens exatas, validade da sessão e casos de borda estão definidos e cada um tem um teste de aceite. Uma reimplementação que passe em `test/spec-001-contas-e-sessoes.test.js` se comporta igual à atual para quem usa a API.
