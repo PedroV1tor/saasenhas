@@ -12,3 +12,6 @@ data/
 .claude/settings.local.json
 
 *.log
+
+# Saída bruta do plugin Better Harness (os relatórios entregues ficam em docs/harness/)
+.claude/better-harness/

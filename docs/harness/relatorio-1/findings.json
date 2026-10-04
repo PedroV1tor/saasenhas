@@ -1,0 +1,462 @@
+{
+  "summary": {
+    "projectName": "saasenhas",
+    "locale": "en",
+    "modelId": "agent-work-loop-v4",
+    "reportContractVersion": 25,
+    "overview": "O SaaSenhas dá ao Claude Code um bom ponto de partida: AGENTS.md, specs numeradas e 28 testes rápidos que passam, junto com o lint. Mas as regras inegociáveis existem só como texto. Nada no projeto impede um agente de ler .env ou data/, e nada roda testes ou lint antes de uma mudança ser declarada pronta. A única sessão do Claude na janela foi esta revisão, então a análise é limitada: o comportamento do agente em tarefas reais não foi observado.",
+    "dimensions": [
+      {
+        "id": "task-understanding",
+        "label": "Task Understanding",
+        "score": 60,
+        "summary": "O AGENTS.md foi carregado nesta sessão do Claude Code e aponta para specs numeradas com critérios de aceite. A spec 002 não diz se senhas devem ser aparadas, e hoje elas são aparadas sem aviso. O README e a documentação do harness apontam para arquivos de agente que não existem.",
+        "findingRefs": [
+          "entry-password-trimmed",
+          "docs-link-missing-agent-files"
+        ]
+      },
+      {
+        "id": "controlled-execution",
+        "label": "Controlled Execution",
+        "score": 52,
+        "summary": "Os comandos de instalar, configurar, testar e lint estão documentados, e testes e lint rodaram sem erro. A regra de não ler .env nem data/ não tem nenhuma permissão no projeto, embora o .gitignore cite .claude/settings.json como a configuração do time.",
+        "findingRefs": [
+          "env-data-read-not-blocked"
+        ]
+      },
+      {
+        "id": "change-validation",
+        "label": "Change Validation",
+        "score": 66,
+        "summary": "28 testes node:test e o ESLint passam em cerca de 1,5 s e cobrem as regras centrais de cripto, sessão e cofre. A regra de que a resposta de reutilização nunca traz senha não tem teste de rota que pegaria um vazamento.",
+        "findingRefs": [
+          "reuse-route-leak-untested"
+        ]
+      },
+      {
+        "id": "reliable-delivery",
+        "label": "Reliable Delivery",
+        "score": 40,
+        "summary": "O repositório tem um remote no GitHub, mas não tem workflow de CI nem hook. A regra 'teste + lint antes de pronto' depende do relato do próprio agente. A revisão e a proteção de branch no GitHub não foram verificadas.",
+        "findingRefs": [
+          "done-gate-self-reported"
+        ]
+      },
+      {
+        "id": "learning-capture",
+        "label": "Learning Capture",
+        "score": 35,
+        "summary": "A janela só tem esta sessão de revisão, então ainda não dá para avaliar trabalho repetido, correções nem resultados. docs/harness/ tem modelos vazios de relatório e reparo prontos para registrar isso.",
+        "findingRefs": [
+          "no-coding-sessions-observed"
+        ]
+      }
+    ],
+    "aiAgentPractice": {
+      "inspectedSurfaces": [
+        "Rules"
+      ],
+      "coverageRows": [
+        {
+          "surface": "Rules",
+          "scopes": [
+            "Project"
+          ],
+          "count": 1,
+          "paths": [
+            "AGENTS.md"
+          ]
+        },
+        {
+          "surface": "Custom Agents",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        }
+      ]
+    },
+    "evidenceMode": "session-limited",
+    "evidenceBoundary": {
+      "manifest": {
+        "schemaVersion": 2,
+        "sourceFingerprint": "0138e596a2960386",
+        "adapterVersion": "claude-task-loop-source-v2",
+        "platform": "claude",
+        "selection": {
+          "strategy": "all-eligible",
+          "eligibleCount": 1,
+          "analyzedCount": 1,
+          "confidence": "High"
+        }
+      },
+      "episodeCoverage": {
+        "episodeCount": 0,
+        "editedEpisodeCount": 0,
+        "closedEpisodeCount": 0,
+        "recoveredEpisodeCount": 0
+      },
+      "deliveryEvidenceLevels": [],
+      "sourceGaps": []
+    },
+    "semanticFacets": {
+      "schemaVersion": 1,
+      "status": "supplementary",
+      "entries": [
+        {
+          "id": "session-insight:source-coverage",
+          "kind": "redacted-summary",
+          "episodeRef": null,
+          "status": "candidate",
+          "labels": [
+            "source-coverage",
+            "High"
+          ],
+          "summary": "Analyzed 1 of 1 sessions; 1/3 enabled source roots exist. Use this as the current workspace evidence boundary for final insight cards.",
+          "evidenceRefs": [],
+          "modelVersion": "session-insights-v1"
+        },
+        {
+          "id": "session-insight:validation-behavior",
+          "kind": "redacted-summary",
+          "episodeRef": null,
+          "status": "candidate",
+          "labels": [
+            "validation-behavior",
+            "Low"
+          ],
+          "summary": "No validation command category was observed in the analyzed session sample. Inspect more sessions or add explicit validation guidance before claiming validation-after-edit behavior.",
+          "evidenceRefs": [],
+          "modelVersion": "session-insights-v1"
+        },
+        {
+          "id": "session-insight:post-edit-validation",
+          "kind": "rework-correction",
+          "episodeRef": null,
+          "status": "candidate",
+          "labels": [
+            "post-edit-validation",
+            "Low"
+          ],
+          "summary": "No edit event was observed in the analyzed sample. Inspect more sessions before making claims about edit or validation habits.",
+          "evidenceRefs": [],
+          "modelVersion": "session-insights-v1"
+        },
+        {
+          "id": "session-insight:execution-friction",
+          "kind": "friction-taxonomy",
+          "episodeRef": null,
+          "status": "candidate",
+          "labels": [
+            "execution-friction",
+            "Low"
+          ],
+          "summary": "No strong execution friction signal in the analyzed sample. Keep friction claims narrow unless additional failed commands, rejected actions, or warnings are inspected.",
+          "evidenceRefs": [],
+          "modelVersion": "session-insights-v1"
+        },
+        {
+          "id": "session-insight:tool-mix",
+          "kind": "redacted-summary",
+          "episodeRef": null,
+          "status": "candidate",
+          "labels": [
+            "tool-mix",
+            "High"
+          ],
+          "summary": "Most observed tool: Bash (5). Use this as workflow evidence, then inspect bounded sessions before claiming user intent.",
+          "evidenceRefs": [
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-5-1",
+              "type": "tool.call",
+              "line": 26
+            },
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-5-2",
+              "type": "tool.call",
+              "line": 33
+            },
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-5-3",
+              "type": "tool.call",
+              "line": 37
+            },
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-5-4",
+              "type": "tool.call",
+              "line": 52
+            },
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-5-5",
+              "type": "tool.call",
+              "line": 57
+            }
+          ],
+          "modelVersion": "session-insights-v1"
+        },
+        {
+          "id": "session-insight:session-usage-efficiency",
+          "kind": "redacted-summary",
+          "episodeRef": null,
+          "status": "candidate",
+          "labels": [
+            "session-usage-efficiency",
+            "High"
+          ],
+          "summary": "The analysis covered 1 sessions: none met the active-long threshold. This activity does not establish model preference or quality; effectiveness still requires outcome comparison within the same task family.",
+          "evidenceRefs": [
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-6-1",
+              "type": "metadata.file-history-snapshot",
+              "line": 13
+            },
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-6-2",
+              "type": "model.response.completed",
+              "line": 24
+            },
+            {
+              "kind": "claude-project-jsonl",
+              "id": "session-insight-6-3",
+              "type": "model.response.completed",
+              "line": 33
+            }
+          ],
+          "modelVersion": "session-insights-v1"
+        }
+      ]
+    },
+    "learningCapture": {
+      "schemaVersion": 1,
+      "state": "N/A",
+      "summary": "N/A — requires two comparable observation windows and an intervention comparison.",
+      "interventions": []
+    },
+    "usageActivity": {
+      "schemaVersion": 5,
+      "dateBasis": "UTC",
+      "measurementBasis": "session-starts-active-estimate-model-active-session-days-skill-invocations-loads-mcp-tool-calls-and-observed-token-usage",
+      "truncated": false,
+      "dates": [
+        "2026-10-04"
+      ],
+      "sessions": {
+        "total": 1,
+        "starts": [
+          1
+        ],
+        "activeMinutes": [
+          3
+        ]
+      },
+      "models": [
+        {
+          "name": "claude-opus-5-5",
+          "total": 1,
+          "daily": [
+            1
+          ],
+          "totalFailed": 0,
+          "dailyFailed": [
+            0
+          ]
+        }
+      ],
+      "skills": [],
+      "mcps": [],
+      "tokens": {
+        "observedResponseCount": 6,
+        "totals": {
+          "inputTokens": 14,
+          "outputTokens": 2846,
+          "cacheReadInputTokens": 263798,
+          "cacheCreationInputTokens": 26971
+        },
+        "daily": {
+          "inputTokens": [
+            14
+          ],
+          "outputTokens": [
+            2846
+          ],
+          "cacheReadInputTokens": [
+            263798
+          ],
+          "cacheCreationInputTokens": [
+            26971
+          ]
+        }
+      }
+    },
+    "usageEfficiency": {
+      "schemaVersion": 2,
+      "selection": {
+        "strategy": "all-eligible",
+        "eligibleSessionCount": 1,
+        "analyzedSessionCount": 1,
+        "complete": true
+      },
+      "roles": {
+        "userThreadCandidateCount": 1,
+        "childAgentCandidateCount": 0
+      },
+      "longSessions": {
+        "activeCount": 0,
+        "wallOnlyCount": 0,
+        "longestActiveMinutes": 0,
+        "activeRatio": 0,
+        "estimate": {
+          "method": "capped-event-gap",
+          "activeThresholdMinutes": 45,
+          "gapCapMinutes": 5,
+          "idleGapMinutes": 30
+        },
+        "samples": []
+      },
+      "accounting": {
+        "mode": "host-estimated",
+        "responseCount": 6,
+        "modelAttributedResponseCount": 6,
+        "unattributedResponseCount": 0,
+        "usageFieldObservedCount": 6,
+        "nonZeroUsageCount": 6,
+        "exactCreditsAvailable": false,
+        "pricingVersion": null
+      },
+      "modelUsage": [
+        {
+          "model": "claude-opus-5-5",
+          "responseCount": 6,
+          "usageFieldObservedCount": 6,
+          "nonZeroUsageCount": 6
+        }
+      ],
+      "outcomeReview": {
+        "status": "required",
+        "reviewedCandidateCount": 0,
+        "reviewedActiveLongCount": 0,
+        "comparableModelOutcomeEvidence": false,
+        "recommendation": "controlled-a-b-required"
+      },
+      "tokenTotals": {
+        "inputTokens": 14,
+        "outputTokens": 2846,
+        "cacheReadInputTokens": 263798,
+        "cacheCreationInputTokens": 26971
+      }
+    },
+    "assignmentSummaries": []
+  },
+  "findings": [
+    {
+      "id": "env-data-read-not-blocked",
+      "title": "Nada impede um agente de ler o .env ou o cofre em data/",
+      "severity": "Medium",
+      "reason": "Fato: o AGENTS.md diz que 'nunca leia, imprima nem commite .env ou data/' é inegociável. Existe um .env real na pasta do projeto, e data/ guarda o cofre cifrado dos usuários, com site e usuário em texto puro. Fato: não existe pasta .claude/. O .gitignore diz que a configuração do Claude Code do time fica em .claude/settings.json, e o docs/harness/README.md lista ali as permissões (allow / ask / deny) como artefato planejado. Nenhum hook está configurado. O .gitignore só protege contra commit. Inferência: no Claude Code, a proibição de leitura depende só de o modelo obedecer ao texto. Incerteza: configurações do Claude no nível do usuário ou gerenciadas ficaram fora do escopo autorizado e podem ter regras de bloqueio. Nenhuma leitura real de .env ou data/ foi observada.",
+      "dimensionRefs": [
+        "controlled-execution"
+      ],
+      "subdimensionRefs": [
+        "permission-boundary"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nCrie o arquivo de configuração do Claude Code no nível do projeto que o .gitignore e o docs/harness/README.md já citam: .claude/settings.json. Adicione regras permissions.deny para que o Claude Code não consiga ler .env (nem .env.*, exceto .env.example) nem nada dentro de data/. Mantenha o .env.example legível. Não abra .env nem data/ durante a mudança. Não adicione regras allow nem hooks que não tenham relação com isso.\n\n## Validation\n\n- Rode npm test e npm run lint e confirme que os dois passam\n- Numa sessão nova do Claude Code neste repositório, rode /permissions e confirme que as regras de bloqueio para .env e data/ aparecem\n- Peça ao agente para ler o .env e confirme que a leitura é negada sem mostrar nenhum conteúdo",
+      "expectedArtifact": "Permissões do Claude Code",
+      "expectedOutput": [
+        "Um .claude/settings.json commitado cujas regras deny bloqueiam a leitura de .env e data/, com o .env.example ainda legível, confirmado por uma tentativa de leitura negada numa sessão nova."
+      ]
+    },
+    {
+      "id": "entry-password-trimmed",
+      "title": "Senhas salvas perdem espaços do início e do fim sem aviso",
+      "severity": "Medium",
+      "reason": "Fato: requireText devolve value.trim() (src/vault/vault-service.js) e é usado para a senha ao criar e ao editar uma entrada. Um teste em execução salvou uma senha com espaços nas pontas e recebeu ela de volta sem os espaços. Fato: a spec 002 só diz 'senha é obrigatória (até 512)' e não fala de aparar espaços, e todos os critérios de aceite dela estão marcados. Inferência: a spec não define essa regra, então um agente que trabalha a partir da spec não consegue saber se é bug ou intenção, e o usuário pode receber de volta uma senha diferente sem perceber. Incerteza: não se sabe se aparar é intencional. O AGENTS.md manda perguntar ao usuário quando o pedido tem duas leituras.",
+      "dimensionRefs": [
+        "task-understanding"
+      ],
+      "subdimensionRefs": [
+        "goal-understanding"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nPergunte ao usuário se a senha das entradas deve ser guardada exatamente como digitada ou aparada. Registre a resposta como regra em docs/specs/002-cofre-de-senhas.md. Depois adicione um teste em test/vault-service.test.js que fixe essa regra ao criar e ao editar. Só mude src/vault/vault-service.js se a regra decidida for diferente do comportamento atual. Não mexa no tratamento de site e usuario.\n\n## Validation\n\n- Rode npm test e confirme que o teste novo passa\n- Rode npm run lint e confirme que passa\n- Confirme que a spec 002 diz qual é a regra de espaços para a senha",
+      "expectedArtifact": "Regra na spec e teste focado",
+      "expectedOutput": [
+        "A spec 002 diz se a senha mantém os espaços das pontas, e um teste do vault-service prova que uma senha com espaços volta de acordo com essa regra."
+      ]
+    },
+    {
+      "id": "reuse-route-leak-untested",
+      "title": "Um vazamento de senha pela rota de reutilização passaria em todos os testes",
+      "severity": "Low",
+      "reason": "Fato: o AGENTS.md diz que as respostas de reutilização nunca contêm senhas. A spec 002 diz o mesmo para GET /api/entradas/reutilizadas, e esse critério de aceite está marcado. Fato: a rota passa as entradas por toApi (src/app.js), que inclui senha sempre que existe um campo de senha. O test/api.test.js só confere quantidade nessa rota, e a checagem de 'sem senha' só existe na camada de serviço. Inferência: uma mudança na rota ou em findReused que vaze a senha não faria o npm test falhar. Incerteza: é uma leitura estática da cobertura, e nenhum teste de mutação foi rodado. Hoje não há vazamento.",
+      "dimensionRefs": [
+        "change-validation"
+      ],
+      "subdimensionRefs": [
+        "relevant-check"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nEm test/api.test.js, adicione checagens no nível da rota de que nenhuma entrada nas respostas de GET /api/entradas/reutilizadas, POST /api/entradas e PUT /api/entradas/:id tem o campo senha. Só mude src/ se alguma checagem nova falhar.\n\n## Validation\n\n- Rode npm test e confirme que todos os testes passam\n- Faça temporariamente a rota de reutilização incluir a senha, rode npm test, confirme que a checagem nova falha e depois desfaça\n- Rode npm run lint",
+      "expectedArtifact": "Teste de regressão na rota",
+      "expectedOutput": [
+        "Testes de API que falham se qualquer resposta de listagem, criação, edição ou reutilização expuser a senha."
+      ]
+    },
+    {
+      "id": "done-gate-self-reported",
+      "title": "Mudanças podem chegar ao GitHub sem testes nem lint rodarem",
+      "severity": "Low",
+      "reason": "Fato: a regra 4 do AGENTS.md exige que npm test e npm run lint passem, com a saída mostrada, antes de dizer 'pronto'. Fato: o repositório tem um remote origin no GitHub, mas não tem .github/workflows, hook de git nem hook do Claude Code. O hook PostToolUse de lint ao editar, citado no docs/harness/README.md, não existe. Inferência: a única prova de que uma mudança foi validada é a mensagem do próprio agente. Incerteza: a proteção de branch e qualquer CI externo no GitHub não foram verificados, e nenhuma validação pulada foi observada.",
+      "dimensionRefs": [
+        "reliable-delivery"
+      ],
+      "subdimensionRefs": [
+        "acceptance-evidence"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nAdicione a menor trava automática que rode os scripts existentes npm test e npm run lint a cada mudança. Prefira um único workflow do GitHub Actions em .github/workflows que rode npm ci, npm test e npm run lint em push e pull_request com Node 20. Fazer push ou ativar proteção de branch no GitHub exige autorização separada do usuário.\n\n## Validation\n\n- Rode npm test e npm run lint localmente e confirme que os dois passam\n- Confirme que o workflow roda exatamente esses scripts\n- Depois que o usuário fizer push, confirme que a execução do workflow para aquele commit ficou verde",
+      "expectedArtifact": "Workflow de CI",
+      "expectedOutput": [
+        "Um workflow que roda os scripts de teste e lint existentes a cada revisão enviada, para que o aceite não dependa só do relato do agente."
+      ]
+    },
+    {
+      "id": "docs-link-missing-agent-files",
+      "title": "A documentação aponta para arquivos de agente que não existem",
+      "severity": "Low",
+      "reason": "Fato: o README.md aponta para CLAUDE.md como instruções para agentes. O docs/harness/README.md aponta para CLAUDE.md, .claude/settings.json, .claude/skills/implementar-com-spec/SKILL.md, scripts/hooks/lint-on-edit.mjs, relatorio-2.md e evidencias.md. Nenhum deles aparece no git ls-files. Inferência: um agente que segue essa documentação pode perder tempo procurando os arquivos ou achar que as permissões e o hook de lint estão ativos. Incerteza: o README do harness descreve um roteiro planejado do curso (Aula 09), então esses arquivos podem ser trabalho futuro de propósito. Só não estão marcados como planejados.",
+      "dimensionRefs": [
+        "task-understanding"
+      ],
+      "subdimensionRefs": [
+        "relevant-context"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nNo README.md e no docs/harness/README.md, marque como planejado (ou remova o link de) todo arquivo citado que ainda não existe, para que os links só apontem para arquivos que existem. Não crie os arquivos planejados nesta mudança.\n\n## Validation\n\n- Para cada link relativo no README.md e no docs/harness/README.md, confirme que o destino existe ou que o item está marcado como planejado\n- Rode npm run lint",
+      "expectedArtifact": "Links da documentação corrigidos",
+      "expectedOutput": [
+        "Documentação de entrada cujos links relativos funcionam, ou que marca claramente como planejados os arquivos de agente ainda não criados."
+      ]
+    },
+    {
+      "id": "no-coding-sessions-observed",
+      "title": "Ainda não há sessões de código no Claude Code para aprender com elas",
+      "severity": "Low",
+      "reason": "Fato: a janela de 30 dias do Claude tem uma única sessão elegível, que é esta revisão, com 0 edições, 0 verificações e 0 resultados. Inferência: não dá para saber se os agentes seguem as regras de spec primeiro e de teste + lint, se repetem trabalho ou se esbarram em atritos, então nenhum procedimento repetido pode ser levado a um dono durável. Incerteza: sessões de outros provedores, da pasta do usuário e de janelas anteriores não foram autorizadas nem observadas. docs/harness/relatorio-1.md e reparo-1.md são modelos vazios.",
+      "dimensionRefs": [
+        "learning-capture"
+      ],
+      "subdimensionRefs": [
+        "lifecycle-repeat-detection"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nNão crie Skill, Hook nem Memory por causa deste achado. Preencha docs/harness/relatorio-1.md com os resultados deste relatório e docs/harness/reparo-1.md com o achado escolhido para reparo. Depois que pelo menos duas tarefas de código reais forem feitas com o Claude Code neste repositório, rode /better-harness de novo com o mesmo provedor e uma janela que cubra essas tarefas.\n\n## Validation\n\n- Confirme que relatorio-1.md e reparo-1.md não têm mais comentários de preenchimento\n- Confirme que a nova execução mostra pelo menos dois episódios de tarefa com edições ou verificações",
+      "expectedArtifact": "Linha de base da revisão registrada",
+      "expectedOutput": [
+        "Primeiro relatório e registro de reparo preenchidos, mais uma janela de revisão posterior com pelo menos dois episódios de código comparáveis."
+      ]
+    }
+  ]
+}
