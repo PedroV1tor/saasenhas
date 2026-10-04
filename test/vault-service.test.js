@@ -59,6 +59,16 @@ test('valida campos obrigatórios da entrada', async () => {
   await assert.rejects(vault.addEntry(email, key, { site: 'a.com', username: 'ana' }), /senha/);
 });
 
+test('guarda a senha exatamente como digitada, com espaços nas pontas', async () => {
+  const { vault, email, key } = await unlockedVault();
+  const created = await vault.addEntry(email, key, { site: ' a.com ', username: 'ana', password: '  com espaços  ' });
+  assert.equal(created.site, 'a.com');
+  assert.equal((await vault.getEntry(email, key, created.id)).password, '  com espaços  ');
+
+  await vault.updateEntry(email, key, created.id, { password: ' nova ' });
+  assert.equal((await vault.getEntry(email, key, created.id)).password, ' nova ');
+});
+
 test('encontra senhas reutilizadas sem expor a senha', async () => {
   const { vault, email, key } = await unlockedVault();
   await vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'repetida' });

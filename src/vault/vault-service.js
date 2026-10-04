@@ -22,6 +22,17 @@ function requireText(value, field, max = 200) {
   return value.trim();
 }
 
+// A senha é guardada exatamente como digitada: aparar espaços mudaria a credencial do usuário.
+function requirePassword(value) {
+  if (typeof value !== 'string' || value === '') {
+    throw new AppError(400, 'O campo "senha" é obrigatório.');
+  }
+  if (value.length > 512) {
+    throw new AppError(400, 'O campo "senha" aceita no máximo 512 caracteres.');
+  }
+  return value;
+}
+
 const publicEntry = ({ id, site, username, createdAt, updatedAt }) => ({ id, site, username, createdAt, updatedAt });
 
 export function createVaultService(store) {
@@ -84,7 +95,7 @@ export function createVaultService(store) {
         id: randomUUID(),
         site: requireText(site, 'site'),
         username: requireText(username, 'usuario'),
-        secret: encrypt(requireText(password, 'senha', 512), key),
+        secret: encrypt(requirePassword(password), key),
         createdAt: now,
         updatedAt: now,
       };
@@ -98,7 +109,7 @@ export function createVaultService(store) {
       const entry = findEntry(findUser(data, email), id);
       if (changes.site !== undefined) entry.site = requireText(changes.site, 'site');
       if (changes.username !== undefined) entry.username = requireText(changes.username, 'usuario');
-      if (changes.password !== undefined) entry.secret = encrypt(requireText(changes.password, 'senha', 512), key);
+      if (changes.password !== undefined) entry.secret = encrypt(requirePassword(changes.password), key);
       entry.updatedAt = new Date().toISOString();
       await store.save(data);
       return publicEntry(entry);
