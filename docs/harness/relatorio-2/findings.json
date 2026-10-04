@@ -1,0 +1,208 @@
+{
+  "summary": {
+    "projectName": "saasenhas",
+    "locale": "en",
+    "modelId": "agent-work-loop-v4",
+    "reportContractVersion": 25,
+    "overview": "SaaSenhas has a clear agent route: CLAUDE.md imports AGENTS.md, a spec-first Skill, fast tests (34 pass, lint clean) and a per-edit lint Hook. The weak points are enforcement. The secret boundary that CLAUDE.md promises is only partly configured. Logging a secret passes every automated check. The favoritas commit also shipped a separately requested 404-message change with no spec or test. Session evidence is session-limited: 5 Claude sessions, 3 of the 5 emitted Episodes are this review, so the Skill and Hook are not yet observed in ordinary feature work.",
+    "dimensions": [
+      {
+        "id": "task-understanding",
+        "label": "Task Understanding",
+        "score": 62,
+        "summary": "Rules, the spec-first Skill and numbered specs give a clear acceptance route. One requested behavior change bypassed it, and spec 002 no longer matches the listing contract.",
+        "findingRefs": [
+          "stale-spec-002-listing"
+        ]
+      },
+      {
+        "id": "controlled-execution",
+        "label": "Controlled Execution",
+        "score": 52,
+        "summary": "Start, test and lint commands are documented and run. The deny list leaves the real vault file writable and some .env variants readable, despite the documented guarantee.",
+        "findingRefs": [
+          "secret-boundary-deny-gaps"
+        ]
+      },
+      {
+        "id": "change-validation",
+        "label": "Change Validation",
+        "score": 58,
+        "summary": "The suite is fast and covers the core secret invariants. The rule against logging the master password has no failing check, and the 404 change has no test.",
+        "findingRefs": [
+          "secret-logging-passes-checks",
+          "untested-404-message-change"
+        ]
+      },
+      {
+        "id": "reliable-delivery",
+        "label": "Reliable Delivery",
+        "score": 40,
+        "summary": "Commits go straight to main. The only acceptance evidence is local validation that the agent reports itself. git commit and push are ask-gated, but nothing runs tests before them.",
+        "findingRefs": [
+          "commit-without-proof"
+        ]
+      },
+      {
+        "id": "learning-capture",
+        "label": "Learning Capture",
+        "score": 42,
+        "summary": "Earlier harness reports and a deny-rule repair show a review habit. No later comparable window yet shows that the Skill or Hook improved ordinary work.",
+        "findingRefs": [
+          "skill-hook-use-unobserved"
+        ]
+      }
+    ],
+    "aiAgentPractice": {
+      "inspectedSurfaces": [
+        "Rules",
+        "Skills",
+        "Hooks"
+      ],
+      "coverageRows": [
+        {
+          "surface": "Rules",
+          "scopes": [
+            "Project"
+          ],
+          "count": 1,
+          "paths": [
+            "CLAUDE.md"
+          ]
+        },
+        {
+          "surface": "Skills",
+          "scopes": [
+            "Project"
+          ],
+          "count": 1,
+          "paths": [
+            ".claude/skills/implementar-com-spec/SKILL.md"
+          ]
+        },
+        {
+          "surface": "Hooks",
+          "scopes": [
+            "Project"
+          ],
+          "count": 1,
+          "paths": [
+            ".claude/settings.json"
+          ]
+        },
+        {
+          "surface": "Custom Agents",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        }
+      ]
+    },
+    "assignmentSummaries": []
+  },
+  "findings": [
+    {
+      "id": "secret-boundary-deny-gaps",
+      "title": "The agent can still write the real vault file and read some .env variants",
+      "severity": "High",
+      "reason": "Fact: CLAUDE.md:4 says `.env*` and `data/` are denied, and AGENTS.md calls this non-negotiable. .claude/settings.json:16-26 denies only these: Read on `.env`, `.env.local` and `.env.*.local`; Edit on `.env`; Read on `data/**`; and three exact `cat`/`type .env` commands. Nothing denies Edit or Write under `data/`, where DATA_FILE points to `data/vault.json` per .env.example. Read is not denied for `.env.production`, `.env.development` or `.env.test`, and Edit is not denied for `.env.local`. .gitignore also misses `.env.production` and `.env.test`; `git check-ignore` matched only `data/`. Inference: an agent can corrupt the real encrypted vault, or read a secrets file that the rules say is protected, with no permission prompt. No breach was observed. Owner: the permissions.deny block in .claude/settings.json, plus .gitignore. Provider: Claude. Uncertainty: deny rules were reviewed statically, not dry-run for each path variant.",
+      "dimensionRefs": [
+        "controlled-execution"
+      ],
+      "subdimensionRefs": [
+        "permission-boundary"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nMake the deny list in .claude/settings.json match the guarantee in CLAUDE.md:4. Deny Read and Edit for `./.env` and every `./.env.*` variant except `./.env.example`, and deny Edit for `./data/**`. Keep the existing allow and ask entries. Keep `.env.example` readable; commit d1c5bf2 fixed exactly that regression. Add `.env.*` with a `!.env.example` exception to .gitignore. Do not read, create or modify any real .env file or anything under data/ while making the change.\n\n## Validation\n\n- Run `git check-ignore -v .env.production .env.test` and confirm both match, and confirm `.env.example` does not\n- Run `npm test` and `npm run lint` and show both outputs\n- Have a human confirm in a new session that a Write to a dummy path under data/ and a Read of a dummy `.env.production` are denied, and that `.env.example` is still readable",
+      "expectedArtifact": "Config",
+      "expectedOutput": [
+        "The deny list covers Read and Edit for every `.env` variant except `.env.example`, and Edit for `data/**`. .gitignore ignores all non-example `.env` files."
+      ]
+    },
+    {
+      "id": "secret-logging-passes-checks",
+      "title": "Code that logs the master password passes the lint hook, npm run lint and the tests",
+      "severity": "Medium",
+      "reason": "Fact: AGENTS.md says the master password is never logged. eslint.config.js:15 sets `no-console` to `warn`, the `lint` script is `eslint .` with no warning limit, and ESLint exits 0 on warnings alone. scripts/hooks/lint-on-edit.mjs:21-22 treats exit 0 as `ESLint OK`, sends that only as a user-facing systemMessage, and throws away the warning text. No test checks log output. Inference: a `console.log(req.body)` added to the session or account routes would leak the master password, and every check the agent is told to run would still pass. Owner: the `no-console` rule in eslint.config.js. Raising it to `error` makes the hook and `npm run lint` both fail. Provider: Claude. Accounted: the lint envelope's `hook-blocking-contract-mismatch` error on this hook is deferred. A PostToolUse exit 2 cannot undo the edit, but its stderr does reach Claude, which is what the hook intends.",
+      "dimensionRefs": [
+        "change-validation"
+      ],
+      "subdimensionRefs": [
+        "relevant-check"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nIn eslint.config.js, raise `no-console` from `warn` to `error` and keep the existing `allow: ['error']` option, so that `console.error` in the error handler stays allowed. Do not change other rules, and do not add disable comments to make the change pass.\n\n## Validation\n\n- Run `npm run lint` and `npm test` on the current tree and show that both pass\n- Temporarily add `console.log('x')` to src/app.js and run `npm run lint`. Show that it now exits non-zero with a no-console error, then remove the line and rerun `npm run lint` to confirm it passes",
+      "expectedArtifact": "Config",
+      "expectedOutput": [
+        "A `console.log` in src/ fails `npm run lint`, and the PostToolUse lint hook reports it back to the agent."
+      ]
+    },
+    {
+      "id": "untested-404-message-change",
+      "title": "A requested change to an API error message shipped with no spec rule or test",
+      "severity": "Medium",
+      "reason": "Fact: session Episode E4 asked to change the `Rota não encontrada.` message. After its one-file edit, no check was observed. Commit 9cddcca then shipped the new 404 text at src/app.js:104 inside the favoritas feature commit. Spec 004 has no rule for it, and no test asserts the 404 body; test/api.test.js only checks status codes. AGENTS.md and the implementar-com-spec Skill require spec, then a failing test, then code for any behavior change. Inference: an API response change got around the spec-first route and is unprotected against regression. The edit was requested, so it is not silent scope creep. Owner: test/api.test.js plus the spec that owns error responses. Provider: Claude. Uncertainty: Skill invocation is not observable in session facts.",
+      "dimensionRefs": [
+        "change-validation"
+      ],
+      "subdimensionRefs": [
+        "relevant-check"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nUse the implementar-com-spec Skill for the existing 404 message `Rota não encontrada no SaaSenhas.` (src/app.js:104). Record the message as a rule in the spec that owns error responses under docs/specs/; ask the user which spec owns it if that is unclear. Add a test in test/api.test.js that requests an unknown route and asserts both status 404 and the `erro` body. Do not change the message itself.\n\n## Validation\n\n- Run `npm test` and show the new test passing in the `# pass` / `# fail 0` lines\n- Run `npm run lint` and show it passes",
+      "expectedArtifact": "Test",
+      "expectedOutput": [
+        "One spec rule and one API test pin the 404 body, so a future change to the text fails `npm test`."
+      ]
+    },
+    {
+      "id": "commit-without-proof",
+      "title": "Commits reach main with no automatic test or lint proof",
+      "severity": "Medium",
+      "reason": "Fact: the three commits made during this review, including the favoritas feature, went straight to main. There is no CI (.github is absent), no pre-commit hook, and no Stop hook. The only automatic check is the PostToolUse hook, and its matcher is `Edit|Write` (.claude/settings.json:31), so files changed through Bash skip it. Bash was the most used tool in the analyzed sessions. In the one project-change Episode (E4), no check was observed after the edit. Inference: the `npm test` + `npm run lint` before 'done' rule depends on the agent remembering it, and the human approving `git commit` sees no test result. Owner: hooks in .claude/settings.json. A PreToolUse hook on `git commit` that runs the roughly 2-second suite is the smallest gate. Provider: Claude. Uncertainty: hook-run lint may not show in session facts as a check.",
+      "dimensionRefs": [
+        "reliable-delivery"
+      ],
+      "subdimensionRefs": [
+        "acceptance-evidence"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nAdd a PreToolUse hook in .claude/settings.json, matched on Bash, that runs only when the command starts with `git commit`. It should run `npm test` and `npm run lint` from the project root and block the commit with the failing output when either fails. Follow the style of scripts/hooks/lint-on-edit.mjs: a Node script under scripts/hooks/ that sets an exit code instead of calling process.exit. Keep the existing ask rule for git commit. Show the proposed hook to the user before saving it, because it changes the project's agent settings.\n\n## Validation\n\n- Run `npm test` and `npm run lint` and show both pass\n- Feed the hook a sample `git commit` tool input with one test temporarily broken, and show it exits 2 with the `# fail` output. Restore the test and show it exits 0",
+      "expectedArtifact": "Hook",
+      "expectedOutput": [
+        "A git commit from the agent is blocked unless npm test and npm run lint pass on the tree being committed."
+      ]
+    },
+    {
+      "id": "stale-spec-002-listing",
+      "title": "Spec 002 still describes the old entry listing without the favorita field",
+      "severity": "Low",
+      "reason": "Fact: AGENTS.md makes docs/specs the source of truth for behavior. docs/specs/002-cofre-de-senhas.md still documents the listing, POST and PUT shapes without `favorita`, while docs/specs/004-favoritas.md redefines them. Neither spec says which one wins. Inference: an agent following the implementar-com-spec Skill can open spec 002 first, as its owner chain directs, and implement or test against the old contract. Owner: docs/specs/002-cofre-de-senhas.md. Provider: project-wide. Uncertainty: no Episode was observed being misled by it yet.",
+      "dimensionRefs": [
+        "task-understanding"
+      ],
+      "subdimensionRefs": [
+        "relevant-context"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nUpdate the API table in docs/specs/002-cofre-de-senhas.md so that the listing, POST and PUT shapes include `favorita` as spec 004 defines, and add one line pointing to 004 for the favoritas rules. Change only documentation; do not touch src/ or test/.\n\n## Validation\n\n- Show that `grep -n favorita docs/specs/002-cofre-de-senhas.md` now matches the API table\n- Run `npm test` and `npm run lint` and show both still pass",
+      "expectedArtifact": "Document",
+      "expectedOutput": [
+        "Spec 002 and spec 004 describe the same entry shape, and 002 links to 004."
+      ]
+    },
+    {
+      "id": "skill-hook-use-unobserved",
+      "title": "No review can yet show whether the spec-first Skill and lint Hook are used in feature work",
+      "severity": "Low",
+      "reason": "Fact: the session lane analyzed 5 Claude sessions. Of the 5 emitted Episodes, 3 are this review, which was not filtered as self-analysis. Another 4 candidates were cut by budget, and no request roots were available, so the repeated-workflow scan is incomplete. No Episode shows the implementar-com-spec Skill being invoked or the Hook firing. Inference: Learning Capture can't decide whether the existing assets are working or whether any procedure repeats. This is an evidence gap, not a defect in the assets. Owner: the harness evidence log in docs/harness/. Provider: Claude. Deferred: the `.env` read lead (2 Episodes) is already covered by CLAUDE.md's `.env.example` rule.",
+      "dimensionRefs": [
+        "learning-capture"
+      ],
+      "subdimensionRefs": [
+        "lifecycle-repeat-detection"
+      ],
+      "aiFixPrompt": "/better-harness fix this issue\n\nIn docs/harness/evidencias.md, add a short baseline entry for this review. Record the date window, that the Skill and Hook were not observed in ordinary feature Episodes, and the check for the next window: the next feature built with implementar-com-spec should show the Skill invoked, a failing test before code, and the npm test / npm run lint proof at handoff. Do not copy prompts, session ids or private paths into the file.\n\n## Validation\n\n- Show the new entry in docs/harness/evidencias.md\n- After the next feature, rerun /better-harness and confirm the session lane shows at least two non-review feature Episodes with Skill and validation evidence",
+      "expectedArtifact": "Document",
+      "expectedOutput": [
+        "A dated baseline in docs/harness/evidencias.md that the next review can compare against."
+      ]
+    }
+  ]
+}
