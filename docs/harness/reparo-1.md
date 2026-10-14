@@ -14,7 +14,7 @@
 - **`.gitattributes`:** fim de linha LF no repositório, para os testes de bytes (CA-12) não dependerem do sistema de quem clona.
 - **Verificação:** `git check-ignore -v .env data/x.json` → `.gitignore:4:.env` e `.gitignore:9:data/`; `cp .env.example .env` passa a funcionar.
 
-- **Commit do reparo:** `b496739` — https://github.com/PedroV1tor/saassenha_novo/commit/b496739
+- **Commit do reparo:** `b496739` — https://github.com/PedroV1tor/saasenhas/commit/b496739
 
 ## Como verificar
 No 2º relatório, o achado de `.env` sem `.gitignore` não deve reaparecer, e a dimensão **Controlled Execution** deve passar a falar de permissões, não de arquivo ignorado.

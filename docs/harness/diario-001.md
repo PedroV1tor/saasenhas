@@ -22,9 +22,9 @@ CA-01 a CA-18: todos com um teste em `test/spec-001-contas-e-sessoes.test.js`, p
 
 ## O que mudamos no harness depois desta feature
 - **Já mudado** (achados do [2º relatório](relatorio-2.md)):
-  - `deny` de leitura e escrita em `data/` e variantes de `.env`; `.gitignore` com `.env.*` → [`a5eae0b`](https://github.com/PedroV1tor/saassenha_novo/commit/a5eae0b)
-  - `no-console` como `error`: o hook barra um `console.log(senhaMestra)` → [`65d0d2e`](https://github.com/PedroV1tor/saassenha_novo/commit/65d0d2e)
-  - hook `PreToolUse` que roda testes e lint antes de `git commit` → [`f2a75e7`](https://github.com/PedroV1tor/saassenha_novo/commit/f2a75e7)
-  - `CLAUDE.md`: commits sem coautoria do Claude e nomes de script proibidos; `AGENTS.md`: `copy` no cmd → [`d915fcd`](https://github.com/PedroV1tor/saassenha_novo/commit/d915fcd)
+  - `deny` de leitura e escrita em `data/` e variantes de `.env`; `.gitignore` com `.env.*` → [`a5eae0b`](https://github.com/PedroV1tor/saasenhas/commit/a5eae0b)
+  - `no-console` como `error`: o hook barra um `console.log(senhaMestra)` → [`65d0d2e`](https://github.com/PedroV1tor/saasenhas/commit/65d0d2e)
+  - hook `PreToolUse` que roda testes e lint antes de `git commit` → [`f2a75e7`](https://github.com/PedroV1tor/saasenhas/commit/f2a75e7)
+  - `CLAUDE.md`: commits sem coautoria do Claude e nomes de script proibidos; `AGENTS.md`: `copy` no cmd → [`d915fcd`](https://github.com/PedroV1tor/saasenhas/commit/d915fcd)
 - **A fazer:** a skill deveria pedir ao agente que **questione** a spec quando ela manda algo arriscado (o caso do `GET /sair`), não só que a siga. E um workflow de CI no GitHub, porque o hook só protege quem usa o Claude Code.
 - **Decidido não mudar:** o hook de lint continua bloqueando entre duas edições da mesma mudança. O alarme falso custa uma volta; avisar sem bloquear deixaria passar o caso real do `_maxAge`.
