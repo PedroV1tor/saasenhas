@@ -1,4 +1,4 @@
-import { newSalt, deriveKeys } from '../crypto/vault-crypto.js';
+import { newSalt, deriveKeys, verifyMasterPassword } from '../crypto/vault-crypto.js';
 import { AppError } from '../errors.js';
 
 const MIN_MASTER_PASSWORD = 10;
@@ -27,6 +27,18 @@ export function createVaultService(store) {
       data.users[normalized] = { salt, verifier };
       await store.save(data);
       return { email: normalized };
+    },
+
+    // Mesma mensagem para e-mail inexistente e senha errada, para não revelar quem tem conta (RN-07).
+    async unlock(email, masterPassword) {
+      const normalized = normalizeEmail(email);
+      const data = await store.load();
+      const user = data.users[normalized];
+      const key = user && typeof masterPassword === 'string'
+        ? verifyMasterPassword(masterPassword, user.salt, user.verifier)
+        : null;
+      if (!key) throw new AppError(401, 'E-mail ou senha mestra inválidos.');
+      return { email: normalized, key };
     },
   };
 }

@@ -10,8 +10,13 @@
   <header class="topo">
     <a class="marca" href="/"><span class="marca-icone" aria-hidden="true">●</span> SaaSenhas</a>
     <nav class="menu">
+    <% if (locals.usuario) { %>
+      <a href="/cofre">Cofre</a>
+      <span class="quem"><%= usuario %></span>
+    <% } else { %>
       <a href="/entrar">Entrar</a>
       <a class="botao botao-pequeno" href="/cadastro">Criar conta</a>
+    <% } %>
     </nav>
   </header>
   <main class="conteudo">

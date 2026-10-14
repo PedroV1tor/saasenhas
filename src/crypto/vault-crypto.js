@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync } from 'node:crypto';
+import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
 // scrypt: N=2^15 deixa cada derivação entre ~60 e ~100 ms, conforme a máquina, o que encarece ataques de força bruta.
 const SCRYPT_OPTIONS = { N: 2 ** 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
@@ -16,4 +16,12 @@ export function deriveKeys(masterPassword, salt) {
     encryptionKey: material.subarray(0, 32),
     verifier: material.subarray(32).toString('base64'),
   };
+}
+
+// Devolve a chave de cifragem se a senha mestra confere; caso contrário, null.
+export function verifyMasterPassword(masterPassword, salt, expectedVerifier) {
+  const { encryptionKey, verifier } = deriveKeys(masterPassword, salt);
+  const actual = Buffer.from(verifier, 'base64');
+  const expected = Buffer.from(expectedVerifier, 'base64');
+  return actual.length === expected.length && timingSafeEqual(actual, expected) ? encryptionKey : null;
 }
