@@ -1,7 +1,8 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes, scryptSync, timingSafeEqual, createCipheriv, createDecipheriv } from 'node:crypto';
 
 // scrypt: N=2^15 deixa cada derivação entre ~60 e ~100 ms, conforme a máquina, o que encarece ataques de força bruta.
 const SCRYPT_OPTIONS = { N: 2 ** 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
+const ALGORITHM = 'aes-256-gcm';
 
 export function newSalt() {
   return randomBytes(16).toString('base64');
@@ -24,4 +25,19 @@ export function verifyMasterPassword(masterPassword, salt, expectedVerifier) {
   const actual = Buffer.from(verifier, 'base64');
   const expected = Buffer.from(expectedVerifier, 'base64');
   return actual.length === expected.length && timingSafeEqual(actual, expected) ? encryptionKey : null;
+}
+
+// Spec 002, RN-01: IV aleatório a cada cifragem; o resultado é "iv.tag.dados" em base64.
+export function encrypt(plaintext, key) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv(ALGORITHM, key, iv);
+  const data = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+  return [iv, cipher.getAuthTag(), data].map((part) => part.toString('base64')).join('.');
+}
+
+export function decrypt(payload, key) {
+  const [iv, tag, data] = payload.split('.').map((part) => Buffer.from(part, 'base64'));
+  const decipher = createDecipheriv(ALGORITHM, key, iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
 }

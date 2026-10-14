@@ -1,0 +1,25 @@
+<%- include('partials/topo', { titulo: id ? 'Editar entrada' : 'Nova entrada' }) %>
+<section class="cartao cartao-estreito">
+  <h1><%= id ? 'Editar entrada' : 'Nova entrada' %></h1>
+  <% if (locals.erro) { %><p class="aviso aviso-erro" role="alert"><%= erro %></p><% } %>
+  <form method="post" action="<%= id ? `/cofre/entradas/${id}` : '/cofre/entradas' %>" novalidate>
+    <div class="campo">
+      <label for="site">Site ou app</label>
+      <input type="text" id="site" name="site" value="<%= site %>" placeholder="github.com" required>
+    </div>
+    <div class="campo">
+      <label for="usuario">Usuário ou e-mail</label>
+      <input type="text" id="usuario" name="usuario" value="<%= usuario %>" autocomplete="off" required>
+    </div>
+    <div class="campo">
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" autocomplete="new-password" <%= id ? '' : 'required' %>>
+      <% if (id) { %><small>Deixe em branco para manter a senha atual.</small><% } %>
+    </div>
+    <div class="acoes">
+      <button class="botao" type="submit">Salvar</button>
+      <a class="botao botao-secundario" href="<%= id ? `/cofre/entradas/${id}` : '/cofre' %>">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/rodape') %>

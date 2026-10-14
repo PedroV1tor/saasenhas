@@ -27,9 +27,17 @@ export async function startServer(app) {
     };
   }
 
+  const post = (path, form, options) => request('POST', path, { ...options, form });
+
   return {
     get: (path, options) => request('GET', path, options),
-    post: (path, form, options) => request('POST', path, { ...options, form }),
+    post,
+    // Cria a conta, entra e devolve o valor do cookie `sessao`.
+    async signUpAndLogin(email, senhaMestra = `senha-mestra-de-${email}`) {
+      await post('/cadastro', { email, senhaMestra });
+      const res = await post('/entrar', { email, senhaMestra });
+      return res.setCookie.find((c) => c.startsWith('sessao='))?.split(';')[0].slice(7);
+    },
     close() {
       server.closeAllConnections();
       server.close();

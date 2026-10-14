@@ -80,4 +80,5 @@ Guardar as contas do usuário (site, usuário e senha) num lugar só, com a senh
 | D-04 | Entrada de outra conta: 403 ou 404? | 404 (RN-07). | 403 confirmaria que o id existe. |
 
 ## 9. Mudanças desde a implementação
-Ainda não implementada.
+**Sem mudança de comportamento:** RN-01 a RN-08 e CA-01 a CA-09 implementados como escritos, um teste por CA em `test/spec-002-cofre-de-senhas.test.js`.
+- O teste do CA-07 falhou na primeira execução por erro **do teste** (a expressão que separa os grupos parava na primeira lista interna). Ajustado antes do commit, com as mesmas asserções.
