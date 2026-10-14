@@ -1,0 +1,19 @@
+<%- include('partials/topo', { titulo: 'Entrar' }) %>
+<section class="cartao cartao-estreito">
+  <h1>Abrir o cofre</h1>
+  <% if (locals.aviso) { %><p class="aviso aviso-<%= aviso.tipo %>" role="status"><%= aviso.texto %></p><% } %>
+  <% if (locals.erro) { %><p class="aviso aviso-erro" role="alert"><%= erro %></p><% } %>
+  <form method="post" action="/entrar" novalidate>
+    <div class="campo">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" name="email" value="<%= email %>" autocomplete="username" required>
+    </div>
+    <div class="campo">
+      <label for="senhaMestra">Senha mestra</label>
+      <input type="password" id="senhaMestra" name="senhaMestra" autocomplete="current-password" required>
+    </div>
+    <button class="botao botao-largo" type="submit">Entrar</button>
+  </form>
+  <p class="rodape-form">Ainda não tem conta? <a href="/cadastro">Criar conta</a></p>
+</section>
+<%- include('partials/rodape') %>

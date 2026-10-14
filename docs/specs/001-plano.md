@@ -37,4 +37,4 @@ Cada tarefa termina com `npm test` e `npm run lint` passando.
 
 | T | Tarefa | Por que entrou | Critério |
 |---|---|---|---|
-| — | — | — | — |
+| T3/T4 | CA-04 dividido: a metade do cadastro no T3, a da entrada no T4 | A metade da entrada precisa do `POST /entrar`, que só nasce no T4. O teste do CA-04 é **ampliado** no T4, não trocado | CA-04 |

@@ -1,0 +1,20 @@
+<%- include('partials/topo', { titulo: 'Criar conta' }) %>
+<section class="cartao cartao-estreito">
+  <h1>Criar conta</h1>
+  <p class="subtitulo">Seu cofre de senhas, protegido por uma senha mestra que só você conhece.</p>
+  <% if (locals.erro) { %><p class="aviso aviso-erro" role="alert"><%= erro %></p><% } %>
+  <form method="post" action="/cadastro" novalidate>
+    <div class="campo">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" name="email" value="<%= email %>" autocomplete="username" required>
+    </div>
+    <div class="campo">
+      <label for="senhaMestra">Senha mestra</label>
+      <input type="password" id="senhaMestra" name="senhaMestra" autocomplete="new-password" required>
+      <small>Pelo menos 10 caracteres. Não existe recuperação: sem ela, ninguém abre o cofre — nem a equipe do SaaSenhas.</small>
+    </div>
+    <button class="botao botao-largo" type="submit">Criar conta</button>
+  </form>
+  <p class="rodape-form">Já tem conta? <a href="/entrar">Entrar</a></p>
+</section>
+<%- include('partials/rodape') %>

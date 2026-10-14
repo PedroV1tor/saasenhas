@@ -1,12 +1,14 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
+import { createMemoryStore } from '../src/vault/store.js';
+import { createVaultService } from '../src/vault/vault-service.js';
 import { startServer } from '../test-support/http.js';
 
 let http;
 
 before(async () => {
-  http = await startServer(createApp());
+  http = await startServer(createApp({ vaultService: createVaultService(createMemoryStore()) }));
 });
 
 after(() => http.close());

@@ -1,6 +1,7 @@
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { AppError } from './errors.js';
+import { contasRoutes } from './routes/contas.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
@@ -14,7 +15,7 @@ function securityHeaders(_req, res, next) {
   next();
 }
 
-export function createApp() {
+export function createApp({ vaultService }) {
   const app = express();
   app.disable('x-powered-by');
   app.set('view engine', 'ejs');
@@ -25,6 +26,7 @@ export function createApp() {
   app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  app.use(contasRoutes({ vaultService }));
 
   app.use((_req, _res, next) => next(new AppError(404, 'Página não encontrada.')));
 
