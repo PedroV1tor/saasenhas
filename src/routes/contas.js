@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { SESSION_COOKIE } from '../auth/session-middleware.js';
+import { SESSION_COOKIE, sessionCookieOptions } from '../auth/session-middleware.js';
 import { AppError } from '../errors.js';
 
 // Avisos da página de entrada, escolhidos pelo parâmetro da URL (tabela da seção 4 da spec 001).
@@ -40,7 +40,7 @@ export function contasRoutes({ vaultService, sessions }) {
     const { email, senhaMestra } = req.body ?? {};
     try {
       const { email: owner, key } = await vaultService.unlock(email, senhaMestra);
-      res.cookie(SESSION_COOKIE, sessions.create(owner, key));
+      res.cookie(SESSION_COOKIE, sessions.create(owner, key), sessionCookieOptions(sessions));
       res.redirect(303, '/cofre');
     } catch (err) {
       renderFormError(res, 'entrar', err, email);

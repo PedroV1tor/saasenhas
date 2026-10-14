@@ -3,6 +3,8 @@ import { AppError } from '../errors.js';
 
 const MIN_MASTER_PASSWORD = 10;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Conta falsa usada quando o e-mail não existe: a derivação roda igual e o tempo não revela quem tem conta (RN-07).
+const NO_ACCOUNT = { salt: newSalt(), verifier: '' };
 
 // RN-01: apara e passa para minúsculas antes de validar e de usar.
 function normalizeEmail(email) {
@@ -33,8 +35,8 @@ export function createVaultService(store) {
     async unlock(email, masterPassword) {
       const normalized = normalizeEmail(email);
       const data = await store.load();
-      const user = data.users[normalized];
-      const key = user && typeof masterPassword === 'string'
+      const user = data.users[normalized] ?? NO_ACCOUNT;
+      const key = typeof masterPassword === 'string'
         ? verifyMasterPassword(masterPassword, user.salt, user.verifier)
         : null;
       if (!key) throw new AppError(401, 'E-mail ou senha mestra inválidos.');

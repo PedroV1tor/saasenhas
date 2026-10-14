@@ -134,3 +134,45 @@ test('CA-12 a mesma senha digitada com acento composto ou decomposto abre o cofr
   assert.equal(res.status, 303);
   assert.equal(res.location, '/cofre');
 });
+
+test('CA-13 e-mail sem conta e senha errada são recusados no mesmo tempo', async () => {
+  await register('lia@exemplo.com', 'senha-mestra-lia');
+  const median = async (email, senhaMestra) => {
+    const times = [];
+    for (let i = 0; i < 3; i++) {
+      const start = performance.now();
+      assert.equal((await login(email, senhaMestra)).status, 401);
+      times.push(performance.now() - start);
+    }
+    return times.sort((a, b) => a - b)[1];
+  };
+  const wrongPassword = await median('lia@exemplo.com', 'senha-mestra-errada');
+  const noAccount = await median('ninguem2@exemplo.com', 'senha-mestra-errada');
+  const ratio = Math.min(wrongPassword, noAccount) / Math.max(wrongPassword, noAccount);
+  assert.ok(ratio >= 0.5, `senha errada ${wrongPassword.toFixed(1)} ms, sem conta ${noAccount.toFixed(1)} ms`);
+});
+
+test('CA-15 cookie protegido e senha mestra fora de cookie, endereço e páginas', async () => {
+  const senha = 'senha-mestra-da-nina';
+  const reg = await register('nina@exemplo.com', senha);
+  const entrar = await http.get(reg.location);
+  const res = await login('nina@exemplo.com', senha);
+  const cookie = res.setCookie.find((c) => c.startsWith('sessao='));
+  for (const attribute of [/;\s*HttpOnly/i, /;\s*SameSite=Strict/i, /;\s*Path=\/(;|$)/, /;\s*Max-Age=900(;|$)/]) {
+    assert.match(cookie, attribute);
+  }
+  const cofre = await openVault(sessionOf(res));
+  const again = await register('nina@exemplo.com', senha);
+  for (const text of [cookie, reg.location, res.location, entrar.html, cofre.html, again.html]) {
+    assert.ok(!text.includes(senha));
+  }
+});
+
+test('CA-16 formulário com erro devolve o e-mail como digitado e a senha mestra vazia', async () => {
+  await register('olga@exemplo.com', 'senha-mestra-olga');
+  const res = await login(' Olga@exemplo.com', 'senha-mestra-errada');
+  assert.equal(res.status, 401);
+  assert.equal(emailField(res.html), ' Olga@exemplo.com');
+  const passwordInput = res.html.match(/<input[^>]*name="senhaMestra"[^>]*>/)[0];
+  assert.doesNotMatch(passwordInput, /value=/);
+});

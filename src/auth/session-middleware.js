@@ -2,6 +2,12 @@ import { AppError } from '../errors.js';
 
 export const SESSION_COOKIE = 'sessao';
 
+// Restrições da spec 001: invisível ao JavaScript da página, nunca enviado a partir de outro site (D-18)
+// e com a mesma validade da sessão no servidor.
+export function sessionCookieOptions(sessions) {
+  return { httpOnly: true, sameSite: 'strict', path: '/', maxAge: sessions.ttlMinutes * 60 * 1000 };
+}
+
 function readCookie(req, name) {
   for (const part of (req.get('cookie') ?? '').split(';')) {
     const [key, ...value] = part.trim().split('=');
