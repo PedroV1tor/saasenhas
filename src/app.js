@@ -4,6 +4,7 @@ import { AppError } from './errors.js';
 import { loadSession } from './auth/session-middleware.js';
 import { contasRoutes } from './routes/contas.js';
 import { cofreRoutes } from './routes/cofre.js';
+import { ferramentasRoutes } from './routes/ferramentas.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
@@ -33,6 +34,7 @@ export function createApp({ vaultService, sessions }) {
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
   app.use(contasRoutes({ vaultService, sessions }));
   app.use(cofreRoutes({ vaultService }));
+  app.use(ferramentasRoutes());
 
   app.use((_req, _res, next) => next(new AppError(404, 'Página não encontrada.')));
 

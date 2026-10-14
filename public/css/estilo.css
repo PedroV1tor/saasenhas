@@ -128,3 +128,13 @@ th { color: var(--suave); font-size: 0.85rem; font-weight: 600; text-transform: 
 .grupos { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
 .grupo { border: 1px solid var(--borda); border-radius: 8px; padding: 0.9rem 1rem; }
 .grupo ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+
+.duas-colunas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; align-items: start; }
+.duas-colunas .cartao + .cartao { margin-top: 0; }
+.tipos { border: 1px solid var(--borda); border-radius: 8px; padding: 0.6rem 1rem; margin: 0 0 1rem; display: grid; gap: 0.3rem; }
+.forca { padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.9rem; }
+.forca-fraca { background: var(--erro-fundo); color: var(--erro-texto); }
+.forca-media { background: #fff4e0; color: #8a5300; }
+.forca-forte { background: var(--ok-fundo); color: var(--ok-texto); }
+.nota { color: var(--suave); font-size: 0.85rem; }
+.resultado ul { margin: 0.25rem 0 1rem; padding-left: 1.2rem; color: var(--suave); }

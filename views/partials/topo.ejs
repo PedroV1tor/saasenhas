@@ -13,9 +13,11 @@
     <nav class="menu">
     <% if (locals.usuario) { %>
       <a href="/cofre">Cofre</a>
+      <a href="/gerador">Gerador</a>
       <span class="quem"><%= usuario %></span>
       <form method="post" action="/sair"><button class="botao botao-pequeno botao-secundario" type="submit">Sair</button></form>
     <% } else { %>
+      <a href="/gerador">Gerador</a>
       <a href="/entrar">Entrar</a>
       <a class="botao botao-pequeno" href="/cadastro">Criar conta</a>
     <% } %>

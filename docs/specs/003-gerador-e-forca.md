@@ -54,4 +54,6 @@ Nada é guardado nem registrado em log: as duas rotas só calculam e respondem.
 | D-03 | Excluir caracteres ambíguos? | Sim (RN-03). | O público digita senhas no celular e na TV; `l` e `I` confundem. |
 
 ## 9. Mudanças desde a implementação
-Ainda não implementada.
+**Sem mudança de comportamento:** RN-01 a RN-06 e CA-01 a CA-08 implementados como escritos.
+- O gerador e o medidor reaproveitam as regras já testadas do protótipo de API (`src/password/`), com os mesmos testes unitários (`test/password.test.js`).
+- O CA-07 passou já na primeira execução, antes do código, porque a rota ainda respondia 404. Continua passando com a rota implementada; por isso o teste confere a ausência da senha, e não o status.

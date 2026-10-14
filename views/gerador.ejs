@@ -1,0 +1,55 @@
+<%- include('partials/topo', { titulo: 'Gerador de senhas' }) %>
+<% const classe = (forca) => (forca.label === 'média' ? 'media' : forca.label); %>
+<div class="duas-colunas">
+  <section class="cartao">
+    <h1>Gerador de senhas</h1>
+    <p class="subtitulo">Senhas aleatórias e fortes, sem caracteres que se confundem (0, O, 1, l, I).</p>
+    <% if (locals.erro) { %><p class="aviso aviso-erro" role="alert"><%= erro %></p><% } %>
+    <% if (locals.gerada) { %>
+      <div class="campo">
+        <label for="gerada">Senha gerada</label>
+        <input type="text" id="gerada" value="<%= gerada.senha %>" readonly>
+        <div class="acoes">
+          <button class="botao botao-pequeno botao-secundario" type="button" data-copiar="gerada">Copiar</button>
+          <span>Força: <strong class="forca forca-<%= classe(gerada.forca) %>"><%= gerada.forca.label %></strong> <span class="nota" data-nota="<%= gerada.forca.score %>">(<%= gerada.forca.score %>/4)</span></span>
+        </div>
+      </div>
+    <% } %>
+    <form method="post" action="/gerador" novalidate>
+      <div class="campo">
+        <label for="tamanho">Tamanho (8 a 128)</label>
+        <input type="number" id="tamanho" name="tamanho" value="<%= opcoes.tamanho %>" min="8" max="128">
+      </div>
+      <fieldset class="tipos">
+        <legend>Usar</legend>
+        <label class="campo-linha"><input type="checkbox" name="minusculas" <%= opcoes.minusculas ? 'checked' : '' %>> minúsculas</label>
+        <label class="campo-linha"><input type="checkbox" name="maiusculas" <%= opcoes.maiusculas ? 'checked' : '' %>> MAIÚSCULAS</label>
+        <label class="campo-linha"><input type="checkbox" name="numeros" <%= opcoes.numeros ? 'checked' : '' %>> números</label>
+        <label class="campo-linha"><input type="checkbox" name="simbolos" <%= opcoes.simbolos ? 'checked' : '' %>> símbolos</label>
+      </fieldset>
+      <button class="botao botao-largo" type="submit">Gerar senha</button>
+    </form>
+  </section>
+
+  <section class="cartao">
+    <h2>Quão forte é a minha senha?</h2>
+    <p class="subtitulo">A senha é avaliada e descartada: não é guardada nem mostrada de volta.</p>
+    <% if (locals.medida) { %>
+      <div class="resultado">
+        <p>Força: <strong class="forca forca-<%= classe(medida) %>"><%= medida.label %></strong> <span class="nota" data-nota="<%= medida.score %>">(<%= medida.score %>/4)</span></p>
+        <% if (medida.suggestions.length) { %>
+          <ul><% for (const sugestao of medida.suggestions) { %><li><%= sugestao %></li><% } %></ul>
+        <% } %>
+      </div>
+    <% } %>
+    <form method="post" action="/forca">
+      <div class="campo">
+        <label for="senhaMedida">Senha</label>
+        <input type="password" id="senhaMedida" name="senha" autocomplete="off">
+      </div>
+      <button class="botao botao-secundario botao-largo" type="submit">Avaliar</button>
+    </form>
+    <p><small>Heurística para orientar, não uma auditoria.</small></p>
+  </section>
+</div>
+<%- include('partials/rodape') %>
