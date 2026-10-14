@@ -1,0 +1,37 @@
+{
+  "summary": {
+    "projectName": "saasenhas",
+    "modelId": "agent-work-loop-v4",
+    "reportContractVersion": 25,
+    "overview": "A feature 001 foi construída pelo ciclo spec → plano → teste que falha → código, com um teste por critério e commits que citam o critério. As permissões negam a leitura do .env e a skill é acionada sem ser citada. O que falta é mecânico: escrita em data/ ainda permitida, no-console só como aviso e nenhum teste rodando antes do commit.",
+    "loopEffectiveness": 61,
+    "assetHealth": 50,
+    "dimensions": [
+      { "id": "task-understanding", "label": "Task Understanding", "status": "demonstrated", "score": 82, "findingRefs": [] },
+      { "id": "controlled-execution", "label": "Controlled Execution", "status": "partial", "score": 58, "findingRefs": ["data-write-and-env-variants-open", "cmd-copy-missing"] },
+      { "id": "change-validation", "label": "Change Validation", "status": "demonstrated", "score": 78, "findingRefs": ["console-log-only-warns"] },
+      { "id": "reliable-delivery", "label": "Reliable Delivery", "status": "not-observed", "score": 40, "findingRefs": ["no-test-gate-on-commit"] },
+      { "id": "learning-capture", "label": "Learning Capture", "status": "partial", "score": 55, "findingRefs": ["team-rule-in-local-memory", "lint-hook-blocks-between-edits"] }
+    ],
+    "evidenceBoundary": {
+      "selection": { "strategy": "all-eligible", "eligibleCount": 14, "analyzedCount": 14, "confidence": "High" },
+      "episodeCoverage": { "episodeCount": 9, "editedEpisodeCount": 9, "closedEpisodeCount": 9, "recoveredEpisodeCount": 3 }
+    },
+    "previousFindings": [
+      { "id": "env-not-ignored", "status": "verified" },
+      { "id": "env-data-read-not-blocked", "status": "partial" },
+      { "id": "documented-commands-missing", "status": "verified" },
+      { "id": "no-claude-md", "status": "verified" },
+      { "id": "done-gate-self-reported", "status": "pending" },
+      { "id": "no-coding-sessions-observed", "status": "pending" }
+    ]
+  },
+  "findings": [
+    { "id": "data-write-and-env-variants-open", "title": "The agent can still write the real vault file and read some .env variants", "priority": "High", "dimension": "controlled-execution", "status": "pending" },
+    { "id": "console-log-only-warns", "title": "A console.log of the master password would pass the hook, lint and tests", "priority": "Medium", "dimension": "change-validation", "status": "pending" },
+    { "id": "no-test-gate-on-commit", "title": "Nothing runs the test suite before a commit", "priority": "Medium", "dimension": "reliable-delivery", "status": "pending" },
+    { "id": "team-rule-in-local-memory", "title": "A rule the team enforced lives only in one person's memory", "priority": "Medium", "dimension": "learning-capture", "status": "pending" },
+    { "id": "cmd-copy-missing", "title": "The \"Configure\" command does not work in Windows cmd", "priority": "Low", "dimension": "controlled-execution", "status": "pending" },
+    { "id": "lint-hook-blocks-between-edits", "title": "The lint hook blocks between two edits of the same change", "priority": "Low", "dimension": "learning-capture", "status": "pending" }
+  ]
+}
