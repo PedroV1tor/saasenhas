@@ -226,3 +226,9 @@ test('CA-18 cofre, entrada e cadastro não ficam no cache do navegador', async (
     assert.equal(res.headers.get('cache-control'), 'no-store');
   }
 });
+
+test('CA-14 corpo acima de 10 KB é recusado com 413', async () => {
+  const res = await register('mel@exemplo.com', 'x'.repeat(11 * 1024));
+  assert.equal(res.status, 413);
+  assert.equal(aviso(res.html), 'O corpo da requisição passa de 10 KB.');
+});

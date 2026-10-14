@@ -40,6 +40,7 @@ export function createApp({ vaultService, sessions }) {
   app.use((err, _req, res, _next) => {
     if (err instanceof AppError && err.status === 401) return res.redirect(303, '/entrar?motivo=login');
     if (err instanceof AppError) return res.status(err.status).render('erro', { mensagem: err.message });
+    if (err.type === 'entity.too.large') return res.status(413).render('erro', { mensagem: 'O corpo da requisição passa de 10 KB.' });
     console.error(err.message);
     res.status(500).render('erro', { mensagem: 'Erro interno.' });
   });
