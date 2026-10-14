@@ -1,6 +1,6 @@
 # 002 — Cofre de senhas
 
-> **Status:** rascunho criado pela skill `implementar-com-spec` (prova 4.2 de [`evidencias.md`](../harness/evidencias.md)), aguardando aprovação da equipe.
+> **Status:** aprovada em 09/10/2026 por João Victor Fiuza e Pedro Vitor. Rascunho criado pela skill `implementar-com-spec` (prova 4.2 de [`evidencias.md`](../harness/evidencias.md)); a revisão confirmou D-01 a D-04 sem mudanças.
 > Depende da spec 001 (sessão e chave do cofre). Testes de aceite: `test/spec-002-cofre-de-senhas.test.js`.
 
 ## 1. Objetivo
