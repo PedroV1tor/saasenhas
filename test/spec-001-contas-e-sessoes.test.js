@@ -177,9 +177,9 @@ test('CA-16 formulário com erro devolve o e-mail como digitado e a senha mestra
   assert.doesNotMatch(passwordInput, /value=/);
 });
 
-const logout = (cookie) => http.get('/sair', { cookie });
+const logout = (cookie) => http.post('/sair', {}, { cookie });
 
-test('CA-08 sair encerra a sessão na hora e apaga o cookie', async () => {
+test('CA-08 sair encerra a sessão na hora e apaga o cookie; GET /sair não encerra nada', async () => {
   await register('gabi@exemplo.com', 'senha-mestra-gabi');
   const cookie = sessionOf(await login('gabi@exemplo.com', 'senha-mestra-gabi'));
   const res = await logout(cookie);
@@ -191,6 +191,10 @@ test('CA-08 sair encerra a sessão na hora e apaga o cookie', async () => {
   const second = await logout(cookie);
   assert.equal(second.status, 303);
   assert.equal(second.location, TO_LOGIN);
+
+  const other = sessionOf(await login('gabi@exemplo.com', 'senha-mestra-gabi'));
+  assert.equal((await http.get('/sair', { cookie: other })).status, 404);
+  assert.equal((await openVault(other)).status, 200);
 });
 
 test('CA-09 duas sessões da mesma conta são independentes', async () => {

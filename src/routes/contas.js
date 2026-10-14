@@ -56,8 +56,9 @@ export function contasRoutes({ vaultService, sessions }) {
     }
   });
 
-  // RN-09: encerra só a sessão deste cookie (RN-11) e apaga o cookie.
-  router.get('/sair', requireSession, (req, res) => {
+  // RN-09: encerra só a sessão deste cookie (RN-11) e apaga o cookie. Só POST: um GET pode vir de
+  // pré-carregamento de links e tirar o usuário do cofre sem ele clicar (D-20).
+  router.post('/sair', requireSession, (req, res) => {
     sessions.destroy(req.auth.token);
     res.clearCookie(SESSION_COOKIE, SESSION_COOKIE_BASE);
     res.redirect(303, '/entrar?saiu=1');
