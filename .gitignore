@@ -2,8 +2,8 @@ node_modules/
 
 # Segredos e configuração local — nunca commitar
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Cofre gerado em execução (contém senhas cifradas dos usuários)
 data/
