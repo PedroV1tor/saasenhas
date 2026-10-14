@@ -1,15 +1,22 @@
 import { Router } from 'express';
-import { SESSION_COOKIE, sessionCookieOptions } from '../auth/session-middleware.js';
+import { SESSION_COOKIE, SESSION_COOKIE_BASE, sessionCookieOptions, requireSession } from '../auth/session-middleware.js';
 import { AppError } from '../errors.js';
 
 // Avisos da página de entrada, escolhidos pelo parâmetro da URL (tabela da seção 4 da spec 001).
 function noticeFor(query) {
   if (query.conta === 'criada') return { tipo: 'ok', texto: 'Conta criada. Entre com sua senha mestra.' };
+  if (query.saiu === '1') return { tipo: 'ok', texto: 'Você saiu do cofre.' };
   if (query.motivo === 'login') return { tipo: 'info', texto: 'Faça login para acessar o cofre.' };
   return null;
 }
 
 const text = (value) => (typeof value === 'string' ? value : '');
+
+// RN-13: quem já tem sessão válida não vê os formulários de entrada e cadastro.
+function guestOnly(req, res, next) {
+  if (req.auth) return res.redirect(303, '/cofre');
+  next();
+}
 
 export function contasRoutes({ vaultService, sessions }) {
   const router = Router();
@@ -20,7 +27,9 @@ export function contasRoutes({ vaultService, sessions }) {
     res.status(err.status).render(view, { email: text(email), erro: err.message });
   }
 
-  router.get('/cadastro', (_req, res) => res.render('cadastro', { email: '' }));
+  router.get('/', (req, res) => res.redirect(303, req.auth ? '/cofre' : '/entrar'));
+
+  router.get('/cadastro', guestOnly, (_req, res) => res.render('cadastro', { email: '' }));
 
   router.post('/cadastro', async (req, res) => {
     const { email, senhaMestra } = req.body ?? {};
@@ -32,7 +41,7 @@ export function contasRoutes({ vaultService, sessions }) {
     }
   });
 
-  router.get('/entrar', (req, res) => {
+  router.get('/entrar', guestOnly, (req, res) => {
     res.render('entrar', { email: text(req.query.email), aviso: noticeFor(req.query) });
   });
 
@@ -45,6 +54,13 @@ export function contasRoutes({ vaultService, sessions }) {
     } catch (err) {
       renderFormError(res, 'entrar', err, email);
     }
+  });
+
+  // RN-09: encerra só a sessão deste cookie (RN-11) e apaga o cookie.
+  router.get('/sair', requireSession, (req, res) => {
+    sessions.destroy(req.auth.token);
+    res.clearCookie(SESSION_COOKIE, SESSION_COOKIE_BASE);
+    res.redirect(303, '/entrar?saiu=1');
   });
 
   return router;

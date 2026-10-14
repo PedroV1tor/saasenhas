@@ -176,3 +176,39 @@ test('CA-16 formulário com erro devolve o e-mail como digitado e a senha mestra
   const passwordInput = res.html.match(/<input[^>]*name="senhaMestra"[^>]*>/)[0];
   assert.doesNotMatch(passwordInput, /value=/);
 });
+
+const logout = (cookie) => http.get('/sair', { cookie });
+
+test('CA-08 sair encerra a sessão na hora e apaga o cookie', async () => {
+  await register('gabi@exemplo.com', 'senha-mestra-gabi');
+  const cookie = sessionOf(await login('gabi@exemplo.com', 'senha-mestra-gabi'));
+  const res = await logout(cookie);
+  assert.equal(res.status, 303);
+  assert.equal(res.location, '/entrar?saiu=1');
+  assert.ok(res.setCookie.some((c) => c.startsWith('sessao=;') && c.includes('Expires=Thu, 01 Jan 1970')));
+  assert.equal(aviso((await http.get(res.location)).html), 'Você saiu do cofre.');
+  assert.equal((await openVault(cookie)).location, TO_LOGIN);
+  const second = await logout(cookie);
+  assert.equal(second.status, 303);
+  assert.equal(second.location, TO_LOGIN);
+});
+
+test('CA-09 duas sessões da mesma conta são independentes', async () => {
+  await register('hugo@exemplo.com', 'senha-mestra-hugo');
+  const phone = sessionOf(await login('hugo@exemplo.com', 'senha-mestra-hugo'));
+  const laptop = sessionOf(await login('hugo@exemplo.com', 'senha-mestra-hugo'));
+  assert.notEqual(phone, laptop);
+  await logout(phone);
+  assert.equal((await openVault(phone)).location, TO_LOGIN);
+  assert.equal((await openVault(laptop)).status, 200);
+});
+
+test('CA-17 quem já tem sessão e abre a entrada ou o cadastro vai para o cofre', async () => {
+  await register('paula@exemplo.com', 'senha-mestra-paula');
+  const cookie = sessionOf(await login('paula@exemplo.com', 'senha-mestra-paula'));
+  for (const path of ['/entrar', '/cadastro']) {
+    const res = await http.get(path, { cookie });
+    assert.equal(res.status, 303, path);
+    assert.equal(res.location, '/cofre', path);
+  }
+});
