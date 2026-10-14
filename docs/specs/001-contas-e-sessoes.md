@@ -164,4 +164,14 @@ Cada ambiguidade encontrada na primeira versão desta spec, na revisão cruzada 
 **Para os dados já gravados, não totalmente.** A spec fixa o algoritmo, os parâmetros e a divisão dos 64 bytes da derivação, mas não o formato do arquivo `DATA_FILE`. Esse formato fica para a spec 002 (cofre), dona do arquivo.
 
 ## 9. Mudanças desde a implementação
-Ainda não implementada. O plano será derivado desta versão.
+Registro do item 6 da atividade de 03/10. O plano está em [`001-plano.md`](001-plano.md); os commits de cada tarefa citam o critério.
+
+**A implementação mudou comportamento? Sim, em dois pontos — e a spec mudou antes do código (commit `e038c99`):**
+| O que mudou | Antes (spec `345a7ed`) | Depois | Onde |
+|---|---|---|---|
+| Como se sai | link `GET /sair` | botão com `POST /sair`; `GET /sair` → 404 | D-20, RN-09, CA-08 |
+| Cache das páginas | não dito | `Cache-Control: no-store` em toda página | D-21, RN-14, CA-18 (novo) |
+
+**Sem mudança de comportamento:** RN-01 a RN-08 e RN-10 a RN-13; CA-01 a CA-07 e CA-09 a CA-17 foram implementados exatamente como escritos na versão revisada. Nenhum teste foi apagado, desativado ou afrouxado. Duas observações da implementação, sem mudar a spec:
+- O CA-04 foi coberto em dois commits (cadastro no T3, entrada no T4); o teste foi ampliado, não trocado.
+- O CA-16 já passava quando foi escrito (T5): o formulário com erro já seguia a RN-12 desde o T3.
