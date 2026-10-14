@@ -1,0 +1,29 @@
+{
+  "summary": {
+    "projectName": "saasenhas",
+    "modelId": "agent-work-loop-v4",
+    "reportContractVersion": 25,
+    "overview": "O SaaSenhas tem uma spec 001 bem fechada e um AGENTS.md com princípios e regras de segurança, mas ainda nenhum código. As regras inegociáveis existem só como texto: não há .gitignore, .env.example nem permissões, e os comandos documentados não existem porque não há package.json.",
+    "loopEffectiveness": 38,
+    "assetHealth": 0,
+    "dimensions": [
+      { "id": "task-understanding", "label": "Task Understanding", "score": 62, "findingRefs": ["no-claude-md"] },
+      { "id": "controlled-execution", "label": "Controlled Execution", "score": 30, "findingRefs": ["env-not-ignored", "env-data-read-not-blocked"] },
+      { "id": "change-validation", "label": "Change Validation", "score": 20, "findingRefs": ["documented-commands-missing"] },
+      { "id": "reliable-delivery", "label": "Reliable Delivery", "score": 25, "findingRefs": ["done-gate-self-reported"] },
+      { "id": "learning-capture", "label": "Learning Capture", "score": 30, "findingRefs": ["no-coding-sessions-observed"] }
+    ],
+    "evidenceBoundary": {
+      "selection": { "strategy": "all-eligible", "eligibleCount": 3, "analyzedCount": 3, "confidence": "High" },
+      "episodeCoverage": { "episodeCount": 0, "editedEpisodeCount": 0, "closedEpisodeCount": 0, "recoveredEpisodeCount": 0 }
+    }
+  },
+  "findings": [
+    { "id": "env-not-ignored", "title": "O comando \"Configurar\" do AGENTS.md cria um .env que nada impede de ser commitado", "priority": "Medium", "dimension": "controlled-execution", "status": "pending" },
+    { "id": "env-data-read-not-blocked", "title": "Nada impede um agente de ler o .env ou o cofre em data/", "priority": "Medium", "dimension": "controlled-execution", "status": "pending" },
+    { "id": "documented-commands-missing", "title": "Os comandos do AGENTS.md ainda não existem", "priority": "Medium", "dimension": "change-validation", "status": "pending" },
+    { "id": "no-claude-md", "title": "O Claude Code não carrega o AGENTS.md sozinho", "priority": "Low", "dimension": "task-understanding", "status": "pending" },
+    { "id": "done-gate-self-reported", "title": "\"Teste e lint antes de pronto\" depende só do relato do agente", "priority": "Low", "dimension": "reliable-delivery", "status": "pending" },
+    { "id": "no-coding-sessions-observed", "title": "Ainda não há sessões de código para aprender com elas", "priority": "Low", "dimension": "learning-capture", "status": "pending" }
+  ]
+}
