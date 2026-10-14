@@ -7,12 +7,28 @@ Sistema web de um micro-SaaS que organiza as senhas do usuário num cofre cifrad
 |---|---|
 | Instalar | `npm install` |
 | Configurar | `cp .env.example .env` |
-| Rodar | `npm start` (ou `npm run dev` com reload) → http://localhost:3000 |
-| Testar | `npm test` (node:test) |
+| Rodar | `npm start` (ou `npm run dev` com reload) → http://localhost:3000 (saúde: `/health`) |
+| Testar | `npm test` (node:test, poucos segundos) |
 | Lint | `npm run lint` (ESLint 9) |
+
+Requer Node 20.18+ (versão em `.nvmrc`; `--env-file` não existe antes da 20.6).
 
 ## Stack
 Node.js 20.18 (ESM) · Express 5 · EJS (páginas no servidor) · CSS e JS puros em `public/` · `node:test` + `node:assert` · ESLint 9 · `node:crypto` (scrypt + AES-256-GCM). Sem banco: o cofre é um JSON em `DATA_FILE`.
+
+## Estrutura
+```
+src/app.js            createApp: middlewares, cabeçalhos de segurança e página de erro
+src/server.js         ponto de entrada (lê config e sobe o servidor)
+src/routes/           páginas e formulários, um arquivo por área
+src/                  regras (crypto/, vault/, auth/, password/) sem saber de HTTP
+views/                páginas EJS (partials/ = topo e rodapé)
+public/               CSS e JS do navegador
+test/                 spec-NNN-*.test.js (um teste por CA) + um *.test.js por módulo
+test-support/         ajudante HTTP dos testes
+docs/specs/           specs numeradas — a fonte da verdade do comportamento
+docs/harness/         relatórios, evidências e diário do harness
+```
 
 ## Specs
 Ficam em `docs/specs/NNN-nome.md` (objetivo, escopo, atores, dados, regras, critérios de aceite, restrições e decisões). Mudança de comportamento começa pela spec.

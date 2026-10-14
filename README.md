@@ -15,5 +15,15 @@ Micro-SaaS para organizar e gerenciar senhas de forma simples e segura — feito
 
 Disciplina: ESW442 — Técnicas Avançadas de Construção de Software (UniRV) · Harness: **Claude Code**
 
+## Como rodar
+Requer Node.js 20.18+ (`.nvmrc`).
+```bash
+npm install
+cp .env.example .env
+npm start          # http://localhost:3000
+npm test
+npm run lint
+```
+
 ## Documentação
 - Comportamento: [`docs/specs/`](docs/specs/) — a fonte da verdade
