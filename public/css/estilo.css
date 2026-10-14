@@ -122,8 +122,13 @@ th { color: var(--suave); font-size: 0.85rem; font-weight: 600; text-transform: 
 @media (max-width: 600px) {
   .topo { padding: 0.75rem 1rem; }
   .cartao { padding: 1.25rem; }
-  th:nth-child(3), td:nth-child(3) { display: none; }
+  th:nth-child(4), td:nth-child(4) { display: none; }
 }
+
+.estrela { width: 2.5rem; }
+.estrela form { margin: 0; }
+.botao-estrela { background: none; border: 0; font-size: 1.3rem; line-height: 1; color: #d4a017; cursor: pointer; padding: 0.2rem; }
+.botao-estrela:hover { transform: scale(1.15); }
 
 .grupos { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
 .grupo { border: 1px solid var(--borda); border-radius: 8px; padding: 0.9rem 1rem; }

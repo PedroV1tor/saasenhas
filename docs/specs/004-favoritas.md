@@ -48,4 +48,5 @@ A entrada (spec 002) ganha o campo **favorita** (verdadeiro ou falso; no arquivo
 | D-03 | Depois de clicar na estrela, para onde volta? | Para `/cofre`. | Simples; o filtro de favoritas é um clique. |
 
 ## 9. Mudanças desde a implementação
-Ainda não implementada.
+**Sem mudança de comportamento:** RN-01 a RN-04 e CA-01 a CA-06 implementados como escritos.
+- Efeito na spec 002: a lista passou a ter o campo `favorita`. O teste unitário que confere os campos exatos da lista (`test/vault-service.test.js`) foi **atualizado para incluir `favorite`**, mantendo a exigência de que senha e segredo não apareçam.

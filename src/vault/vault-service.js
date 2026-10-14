@@ -37,7 +37,15 @@ function requirePassword(value) {
 }
 
 // O que sai do serviço para as páginas: nunca o segredo cifrado.
-const publicEntry = ({ id, site, username, createdAt, updatedAt }) => ({ id, site, username, createdAt, updatedAt });
+// Spec 004, RN-01: entrada gravada antes das favoritas não tem o campo e vale false.
+const publicEntry = ({ id, site, username, favorite = false, createdAt, updatedAt }) => ({
+  id,
+  site,
+  username,
+  favorite,
+  createdAt,
+  updatedAt,
+});
 
 export function createVaultService(store) {
   // Conta apagada do arquivo com a sessão ainda aberta: trata como sessão inválida (spec 001, RN-10).
@@ -84,9 +92,10 @@ export function createVaultService(store) {
       return { email: normalized, key };
     },
 
-    async listEntries(email) {
+    async listEntries(email, { favoritesOnly = false } = {}) {
       const data = await store.load();
-      return findUser(data, email).entries.map(publicEntry);
+      const entries = findUser(data, email).entries.map(publicEntry);
+      return favoritesOnly ? entries.filter((e) => e.favorite) : entries;
     },
 
     async getEntry(email, key, id) {
@@ -95,7 +104,7 @@ export function createVaultService(store) {
       return { ...publicEntry(entry), password: decrypt(entry.secret, key) };
     },
 
-    async addEntry(email, key, { site, username, password }) {
+    async addEntry(email, key, { site, username, password, favorite = false }) {
       const data = await store.load();
       const user = findUser(data, email);
       const now = new Date().toISOString();
@@ -104,6 +113,7 @@ export function createVaultService(store) {
         site: requireText(site, 'site'),
         username: requireText(username, 'usuario'),
         secret: encrypt(requirePassword(password), key),
+        favorite,
         createdAt: now,
         updatedAt: now,
       };
@@ -113,15 +123,25 @@ export function createVaultService(store) {
     },
 
     // Spec 002, RN-04: senha vazia ou ausente na edição mantém a atual.
-    async updateEntry(email, key, id, { site, username, password }) {
+    async updateEntry(email, key, id, { site, username, password, favorite = false }) {
       const data = await store.load();
       const entry = findEntry(findUser(data, email), id);
       entry.site = requireText(site, 'site');
       entry.username = requireText(username, 'usuario');
       if (password) entry.secret = encrypt(requirePassword(password), key);
+      entry.favorite = favorite;
       entry.updatedAt = new Date().toISOString();
       await store.save(data);
       return publicEntry(entry);
+    },
+
+    // Spec 004, RN-03: só a favorita muda; site, usuário e senha ficam como estão.
+    async setFavorite(email, id, favorite) {
+      const data = await store.load();
+      const entry = findEntry(findUser(data, email), id);
+      entry.favorite = favorite;
+      entry.updatedAt = new Date().toISOString();
+      await store.save(data);
     },
 
     async removeEntry(email, id) {

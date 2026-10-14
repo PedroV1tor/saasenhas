@@ -3,20 +3,35 @@
   <div class="cabecalho-pagina">
     <h1>Cofre de <%= email %></h1>
     <div class="acoes">
+      <% if (soFavoritas) { %>
+        <a class="botao botao-secundario" href="/cofre">Ver todas</a>
+      <% } else { %>
+        <a class="botao botao-secundario" href="/cofre?favoritas=1">★ Só favoritas</a>
+      <% } %>
       <a class="botao botao-secundario" href="/cofre/reutilizadas">Senhas reutilizadas</a>
       <a class="botao" href="/cofre/nova">Nova entrada</a>
     </div>
   </div>
   <% if (locals.aviso) { %><p class="aviso aviso-ok" role="status"><%= aviso %></p><% } %>
   <% if (entradas.length === 0) { %>
-    <p class="vazio">Seu cofre ainda está vazio. Comece por <a href="/cofre/nova">uma nova entrada</a>.</p>
+    <% if (soFavoritas) { %>
+      <p class="vazio">Nenhuma favorita ainda. Clique na ☆ de uma entrada para marcá-la.</p>
+    <% } else { %>
+      <p class="vazio">Seu cofre ainda está vazio. Comece por <a href="/cofre/nova">uma nova entrada</a>.</p>
+    <% } %>
   <% } else { %>
     <table>
-      <thead><tr><th>Site</th><th>Usuário</th><th>Atualizada em</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Site</th><th>Usuário</th><th>Atualizada em</th><th></th></tr></thead>
       <tbody>
       <% for (const entrada of entradas) { %>
-        <tr>
-          <td><%= entrada.site %></td>
+        <tr data-favorita="<%= entrada.favorite %>" data-id="<%= entrada.id %>">
+          <td class="estrela">
+            <form method="post" action="/cofre/entradas/<%= entrada.id %>/favorita">
+              <input type="hidden" name="favorita" value="<%= !entrada.favorite %>">
+              <button class="botao-estrela" type="submit" title="<%= entrada.favorite ? 'Desmarcar favorita' : 'Marcar como favorita' %>"><%= entrada.favorite ? '★' : '☆' %></button>
+            </form>
+          </td>
+          <td class="site"><%= entrada.site %></td>
           <td><%= entrada.username %></td>
           <td><%= new Date(entrada.updatedAt).toLocaleDateString('pt-BR') %></td>
           <td><a href="/cofre/entradas/<%= entrada.id %>">Ver</a></td>

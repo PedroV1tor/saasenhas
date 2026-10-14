@@ -1,7 +1,7 @@
 <%- include('partials/topo', { titulo: entrada.site }) %>
 <section class="cartao cartao-estreito">
   <p><a href="/cofre">← Voltar ao cofre</a></p>
-  <h1><%= entrada.site %></h1>
+  <h1><%= entrada.favorite ? '★ ' : '' %><%= entrada.site %></h1>
   <% if (locals.aviso) { %><p class="aviso aviso-ok" role="status"><%= aviso %></p><% } %>
   <div class="campo">
     <label for="usuario">Usuário</label>

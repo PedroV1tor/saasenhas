@@ -17,6 +17,7 @@
       <% if (id) { %><small>Deixe em branco para manter a senha atual.</small><% } %>
       <small>Precisa de uma senha forte? <a href="/gerador" target="_blank" rel="noopener">Abra o gerador</a>.</small>
     </div>
+    <label class="campo campo-linha"><input type="checkbox" name="favorita" <%= favorita ? 'checked' : '' %>> ★ Favorita</label>
     <div class="acoes">
       <button class="botao" type="submit">Salvar</button>
       <a class="botao botao-secundario" href="<%= id ? `/cofre/entradas/${id}` : '/cofre' %>">Cancelar</a>

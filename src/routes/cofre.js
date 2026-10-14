@@ -10,6 +10,8 @@ const NOTICES = {
 };
 
 const text = (value) => (typeof value === 'string' ? value : '');
+// Caixa "Favorita": marcada chega como "on"; desmarcada não chega (spec 004, RN-02).
+const checked = (value) => value !== undefined;
 
 export function cofreRoutes({ vaultService }) {
   const router = Router();
@@ -22,21 +24,27 @@ export function cofreRoutes({ vaultService }) {
   }
 
   router.get('/cofre', async (req, res) => {
-    const entradas = await vaultService.listEntries(req.auth.email);
-    res.render('cofre', { email: req.auth.email, entradas, aviso: NOTICES[req.query.aviso] });
+    const soFavoritas = req.query.favoritas === '1';
+    const entradas = await vaultService.listEntries(req.auth.email, { favoritesOnly: soFavoritas });
+    res.render('cofre', { email: req.auth.email, entradas, soFavoritas, aviso: NOTICES[req.query.aviso] });
   });
 
   router.get('/cofre/nova', (_req, res) => {
-    res.render('entrada-form', { id: null, site: '', usuario: '' });
+    res.render('entrada-form', { id: null, site: '', usuario: '', favorita: false });
   });
 
   router.post('/cofre/entradas', async (req, res) => {
-    const { site, usuario, senha } = req.body ?? {};
+    const { site, usuario, senha, favorita } = req.body ?? {};
     try {
-      await vaultService.addEntry(req.auth.email, req.auth.key, { site, username: usuario, password: senha });
+      await vaultService.addEntry(req.auth.email, req.auth.key, {
+        site,
+        username: usuario,
+        password: senha,
+        favorite: checked(favorita),
+      });
       res.redirect(303, '/cofre?aviso=criada');
     } catch (err) {
-      renderFormError(res, err, { id: null, site: text(site), usuario: text(usuario) });
+      renderFormError(res, err, { id: null, site: text(site), usuario: text(usuario), favorita: checked(favorita) });
     }
   });
 
@@ -51,19 +59,34 @@ export function cofreRoutes({ vaultService }) {
   });
 
   router.get('/cofre/entradas/:id/editar', async (req, res) => {
-    const { id, site, username } = await vaultService.getEntry(req.auth.email, req.auth.key, req.params.id);
-    res.render('entrada-form', { id, site, usuario: username });
+    const { id, site, username, favorite } = await vaultService.getEntry(req.auth.email, req.auth.key, req.params.id);
+    res.render('entrada-form', { id, site, usuario: username, favorita: favorite });
   });
 
   router.post('/cofre/entradas/:id', async (req, res) => {
-    const { site, usuario, senha } = req.body ?? {};
+    const { site, usuario, senha, favorita } = req.body ?? {};
     const { id } = req.params;
     try {
-      await vaultService.updateEntry(req.auth.email, req.auth.key, id, { site, username: usuario, password: senha });
+      await vaultService.updateEntry(req.auth.email, req.auth.key, id, {
+        site,
+        username: usuario,
+        password: senha,
+        favorite: checked(favorita),
+      });
       res.redirect(303, `/cofre/entradas/${id}?aviso=salva`);
     } catch (err) {
-      renderFormError(res, err, { id, site: text(site), usuario: text(usuario) });
+      renderFormError(res, err, { id, site: text(site), usuario: text(usuario), favorita: checked(favorita) });
     }
+  });
+
+  // Spec 004, RN-03 e D-02: recebe o valor, não inverte, para dois cliques não se anularem.
+  router.post('/cofre/entradas/:id/favorita', async (req, res) => {
+    const value = req.body?.favorita;
+    if (value !== 'true' && value !== 'false') {
+      throw new AppError(400, 'O campo "favorita" precisa ser true ou false.');
+    }
+    await vaultService.setFavorite(req.auth.email, req.params.id, value === 'true');
+    res.redirect(303, '/cofre');
   });
 
   router.post('/cofre/entradas/:id/excluir', async (req, res) => {
