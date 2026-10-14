@@ -6,7 +6,7 @@ Sistema web de um micro-SaaS que organiza as senhas do usuário num cofre cifrad
 | Ação | Comando |
 |---|---|
 | Instalar | `npm install` |
-| Configurar | `cp .env.example .env` |
+| Configurar | `cp .env.example .env` (PowerShell/Git Bash) · `copy .env.example .env` (cmd) |
 | Rodar | `npm start` (ou `npm run dev` com reload) → http://localhost:3000 (saúde: `/health`) |
 | Testar | `npm test` (node:test, poucos segundos) |
 | Lint | `npm run lint` (ESLint 9) |
@@ -26,6 +26,7 @@ views/                páginas EJS (partials/ = topo e rodapé)
 public/               CSS e JS do navegador
 test/                 spec-NNN-*.test.js (um teste por CA) + um *.test.js por módulo
 test-support/         ajudante HTTP dos testes
+scripts/hooks/        hooks do Claude Code (lint na edição, testes antes do commit)
 docs/specs/           specs numeradas — a fonte da verdade do comportamento
 docs/harness/         relatórios, evidências e diário do harness
 ```
