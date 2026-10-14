@@ -38,3 +38,5 @@ Cada tarefa termina com `npm test` e `npm run lint` passando.
 | T | Tarefa | Por que entrou | Critério |
 |---|---|---|---|
 | T3/T4 | CA-04 dividido: a metade do cadastro no T3, a da entrada no T4 | A metade da entrada precisa do `POST /entrar`, que só nasce no T4. O teste do CA-04 é **ampliado** no T4, não trocado | CA-04 |
+| T6b | "Sair" passa de link (`GET /sair`) para botão (`POST /sair`) | Revisão humana do commit do T6 (Isabella): GET que muda estado pode ser disparado por pré-carregamento de links. Spec mudou primeiro (D-20) | CA-08 |
+| T6c | `Cache-Control: no-store` em todas as páginas | Teste manual do T6 (Rogger): depois de sair, "Voltar" mostrou o cofre do cache. Spec mudou primeiro (RN-14, D-21) | CA-18 |

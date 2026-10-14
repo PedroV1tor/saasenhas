@@ -10,7 +10,7 @@ Permitir que o estudante crie uma conta com e-mail e senha mestra pelo site e ab
 **Entra:**
 - Página de cadastro de conta com e-mail e senha mestra.
 - Página de entrada (abrir o cofre) com e-mail e senha mestra, que cria uma sessão guardada num cookie.
-- Link "Sair", que encerra a sessão do cookie usado.
+- Botão "Sair", que encerra a sessão do cookie usado.
 - Bloqueio da página do cofre (`/cofre` e sub-rotas) para quem não tem sessão válida.
 - Uma página `/cofre` mínima, que mostra de quem é o cofre (o conteúdo vem na spec 002).
 
@@ -56,7 +56,7 @@ A senha mestra **não** é um campo da conta.
 | `POST /cadastro` | cria a conta | 303 → `/entrar?conta=criada&email=<e-mail normalizado>` · 400 · 409 · 413 |
 | `GET /entrar` | formulário de entrada; mostra o aviso de `?conta=criada`, `?saiu=1` ou `?motivo=login` | 200 · 303 → `/cofre` com sessão válida (RN-13) |
 | `POST /entrar` | abre a sessão | 303 → `/cofre` com o cookie `sessao` · 400 · 401 · 413 |
-| `GET /sair` | encerra a sessão | 303 → `/entrar?saiu=1`, apagando o cookie · 303 → `/entrar?motivo=login` sem sessão válida |
+| `POST /sair` | encerra a sessão (botão "Sair" do menu) | 303 → `/entrar?saiu=1`, apagando o cookie · 303 → `/entrar?motivo=login` sem sessão válida |
 | `GET /cofre` | página do cofre | 200 com sessão válida · 303 → `/entrar?motivo=login` |
 
 **Avisos da página de entrada:**
@@ -75,11 +75,12 @@ A senha mestra **não** é um campo da conta.
 - **RN-06 — Entrada correta.** E-mail cadastrado + senha mestra que confere → 303 para `/cofre`, com uma credencial nova no cookie `sessao`.
 - **RN-07 — Recusa sem pista.** E-mail sem conta, senha mestra errada ou senha mestra ausente → 401 com a mesma mensagem `E-mail ou senha mestra inválidos.` e sem cookie de sessão, para o visitante não descobrir quais e-mails têm conta. Pelo mesmo motivo, o sistema faz a derivação de chave da senha enviada mesmo quando o e-mail não tem conta, e a recusa por e-mail sem conta leva o mesmo tempo que a recusa por senha errada (D-13).
 - **RN-08 — Validade da sessão.** A sessão vale `SESSION_TTL_MINUTES` minutos (padrão 15) contados da entrada. O uso não renova a sessão. No instante exato do fim do prazo ela já está expirada.
-- **RN-09 — Sair.** "Sair" com sessão válida encerra a sessão na hora, apaga o cookie e leva a `/entrar?saiu=1`.
+- **RN-09 — Sair.** O botão "Sair" envia `POST /sair`. Com sessão válida, ele encerra a sessão na hora, apaga o cookie e leva a `/entrar?saiu=1`. Um `GET /sair` não encerra nada (D-20).
 - **RN-10 — Acesso ao cofre.** Pedido ao cofre sem cookie, com credencial inventada, expirada ou encerrada → 303 para `/entrar?motivo=login`, que mostra `Faça login para acessar o cofre.` O mesmo vale para "Sair" sem sessão válida.
 - **RN-11 — Sessões simultâneas.** Cada entrada gera uma credencial diferente. Uma conta pode ter mais de uma sessão aberta, e encerrar uma não afeta as outras.
 - **RN-12 — Formulário com erro.** Quando o cadastro ou a entrada falha, a página volta com a mensagem de erro, o campo e-mail preenchido com o texto **como foi digitado** e o campo senha mestra **vazio** (D-16).
 - **RN-13 — Já com sessão.** Quem tem sessão válida e abre `/entrar` ou `/cadastro` vai direto para `/cofre` (D-17).
+- **RN-14 — Nada no cache.** Toda página sai com `Cache-Control: no-store`, para o botão "Voltar" do navegador não mostrar o cofre depois de sair (D-21).
 
 ### Exemplos da regra mais importante — RN-07 (recusa sem pista)
 Conta existente: `elisa@exemplo.com` com senha mestra `senha-mestra-elisa`.
@@ -102,7 +103,7 @@ Conta existente: `elisa@exemplo.com` com senha mestra `senha-mestra-elisa`.
 - **CA-05** — **Dado** que existe conta para `davi@exemplo.com`, **quando** o visitante entra com ` DAVI@exemplo.com` e a senha mestra certa, **então** recebe 303 para `/cofre` com o cookie `sessao`, e com esse cookie `/cofre` responde 200 mostrando `davi@exemplo.com`.
 - **CA-06** — **Dado** que existe conta para `elisa@exemplo.com`, **quando** o visitante entra com senha errada, com um e-mail sem conta ou sem senha, **então** as três respostas têm o mesmo status 401, a mesma mensagem `E-mail ou senha mestra inválidos.` e nenhuma cria cookie de sessão.
 - **CA-07** — **Dado** um usuário que entrou no instante 0, com validade de 15 minutos, **quando** ele abre o cofre aos 10 minutos e de novo 1 ms antes dos 15 minutos, **então** recebe 200 nas duas vezes; **e quando** abre aos 15 minutos exatos, **então** recebe 303 para `/entrar?motivo=login`.
-- **CA-08** — **Dado** um usuário com sessão válida, **quando** ele sai, **então** recebe 303 para `/entrar?saiu=1` com o cookie apagado e a página mostra `Você saiu do cofre.`; o próximo acesso ao cofre e um segundo "Sair" com a mesma credencial recebem 303 para `/entrar?motivo=login`.
+- **CA-08** — **Dado** um usuário com sessão válida, **quando** ele sai pelo botão "Sair" (`POST /sair`), **então** recebe 303 para `/entrar?saiu=1` com o cookie apagado e a página mostra `Você saiu do cofre.`; o próximo acesso ao cofre e um segundo "Sair" com a mesma credencial recebem 303 para `/entrar?motivo=login`; **e quando** outro usuário abre `GET /sair`, **então** recebe 404 e a sessão dele continua valendo.
 - **CA-09** — **Dado** um usuário com duas sessões abertas, **quando** ele sai em uma, **então** a credencial encerrada é levada a `/entrar?motivo=login` e a outra continua recebendo 200 no cofre.
 - **CA-10** — **Dado** um pedido ao cofre, **quando** ele vem sem cookie ou com uma credencial que o sistema nunca emitiu, **então** a resposta é 303 para `/entrar?motivo=login`, e essa página mostra `Faça login para acessar o cofre.`
 - **CA-11** — **Dado** uma conta cadastrada com a senha mestra `  senha mestra  `, **quando** o visitante entra com `senha mestra`, **então** recebe 401; **e quando** entra com `  senha mestra  `, **então** recebe 303 para `/cofre`.
@@ -112,6 +113,7 @@ Conta existente: `elisa@exemplo.com` com senha mestra `senha-mestra-elisa`.
 - **CA-15** — **Dado** que existe conta para `nina@exemplo.com`, **quando** a visitante entra com a senha mestra certa, **então** o cookie `sessao` vem com `HttpOnly`, `SameSite=Strict`, `Path=/` e `Max-Age=900`, e nem o cookie, nem o endereço do redirecionamento, nem as páginas de cadastro, entrada e cofre contêm a senha mestra.
 - **CA-16** — **Dado** que existe conta para `olga@exemplo.com`, **quando** a visitante entra com ` Olga@exemplo.com` e a senha errada, **então** a página volta com o campo e-mail preenchido com ` Olga@exemplo.com` e o campo senha mestra sem valor.
 - **CA-17** — **Dado** um usuário com sessão válida, **quando** ele abre `/entrar` ou `/cadastro`, **então** recebe 303 para `/cofre`.
+- **CA-18** — **Dado** um usuário com sessão válida, **quando** ele abre `/cofre`, e um visitante abre `/entrar` ou `/cadastro`, **então** as três respostas vêm com `Cache-Control: no-store`.
 
 ## 7. Restrições
 - **Proteção da senha mestra:** antes de ser comparada ou usada, a senha mestra passa pela normalização Unicode NFKC (RN-05) e por uma derivação de chave com sal e custo fixo (scrypt, N = 2^15, r = 8, p = 1, 64 bytes: 32 para a chave do cofre e 32 para o verificador). A comparação do verificador leva o mesmo tempo para senhas certas e erradas. A chave do cofre existe só na memória da sessão.
@@ -145,6 +147,8 @@ Cada ambiguidade encontrada na primeira versão desta spec, na revisão cruzada 
 | D-17 | Quem já tem sessão e abre `/entrar`? | Vai direto ao cofre (RN-13, CA-17). | Evita duas sessões abertas sem querer. |
 | D-18 | O cookie vai junto vindo de um link de outro site (WhatsApp, e-mail)? | Não: `SameSite=Strict`. O usuário vê a página de entrada e entra de novo. | Impede que outro site dispare ações no cofre com a sessão do usuário (CSRF). O incômodo foi aceito. |
 | D-19 | A primeira versão limitava o corpo a 10 KB, mas não dizia a resposta. | 413 `O corpo da requisição passa de 10 KB.` (CA-14). | O erro é do pedido, não do servidor; a mensagem diz o que mudar. |
+| D-20 | **(na implementação, T6)** "Sair" era um link (`GET /sair`). Um GET que muda estado pode ser disparado sem o usuário clicar: pré-carregamento de links do navegador, extensões, leitores de tela que "visitam" o menu. | Botão num formulário com `POST /sair`; `GET /sair` não existe (404) (RN-09, CA-08). | Sair por engano tranca o cofre no meio do uso. Levantado na revisão humana do commit do T6. |
+| D-21 | **(na implementação, T6)** No teste manual, depois de "Sair", o botão "Voltar" do navegador mostrou a lista do cofre guardada no cache. | Toda página sai com `Cache-Control: no-store` (RN-14, CA-18). | Em computador compartilhado (laboratório da faculdade), a próxima pessoa veria o cofre. |
 
 ### Varreduras da Aula 08
 | Varredura | Ocorrências encontradas | Decisão |
