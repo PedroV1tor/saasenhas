@@ -216,3 +216,13 @@ test('CA-17 quem já tem sessão e abre a entrada ou o cadastro vai para o cofre
     assert.equal(res.location, '/cofre', path);
   }
 });
+
+test('CA-18 cofre, entrada e cadastro não ficam no cache do navegador', async () => {
+  await register('rita@exemplo.com', 'senha-mestra-rita');
+  const cookie = sessionOf(await login('rita@exemplo.com', 'senha-mestra-rita'));
+  const pages = [await openVault(cookie), await http.get('/entrar'), await http.get('/cadastro')];
+  for (const res of pages) {
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('cache-control'), 'no-store');
+  }
+});

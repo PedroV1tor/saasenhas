@@ -8,8 +8,10 @@ import { cofreRoutes } from './routes/cofre.js';
 const root = fileURLToPath(new URL('..', import.meta.url));
 
 // Restrições da spec 001: nada de script inline nem de outro site, e nenhuma página dentro de iframe.
+// no-store: depois de sair, "Voltar" não pode mostrar o cofre guardado no cache (RN-14).
 function securityHeaders(_req, res, next) {
   res.set({
+    'Cache-Control': 'no-store',
     'Content-Security-Policy': "default-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'no-referrer',
