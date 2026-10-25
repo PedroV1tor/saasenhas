@@ -40,9 +40,16 @@ function requirePassword(value) {
 const publicEntry = ({ id, site, username, createdAt, updatedAt }) => ({ id, site, username, createdAt, updatedAt });
 
 export function createVaultService(store) {
+  // Conta recém-criada (spec 001) ainda não tem a lista de entradas: começa vazia.
+  function findUser(data, email) {
+    const user = data.users[email];
+    user.entries ??= [];
+    return user;
+  }
+
   // Spec 002, RN-07: entrada de outra conta é indistinguível de entrada inexistente.
   function findEntry(user, id) {
-    const entry = (user.entries ?? []).find((e) => e.id === id);
+    const entry = user.entries.find((e) => e.id === id);
     if (!entry) throw new AppError(404, 'Entrada não encontrada.');
     return entry;
   }
@@ -78,19 +85,18 @@ export function createVaultService(store) {
 
     async listEntries(email) {
       const data = await store.load();
-      return (data.users[email].entries ?? []).map(publicEntry);
+      return findUser(data, email).entries.map(publicEntry);
     },
 
     async getEntry(email, key, id) {
       const data = await store.load();
-      const entry = findEntry(data.users[email], id);
+      const entry = findEntry(findUser(data, email), id);
       return { ...publicEntry(entry), password: decrypt(entry.secret, key) };
     },
 
     async addEntry(email, key, { site, username, password }) {
       const data = await store.load();
-      const user = data.users[email];
-      user.entries ??= [];
+      const user = findUser(data, email);
       const now = new Date().toISOString();
       user.entries.push({
         id: randomUUID(),
@@ -106,7 +112,7 @@ export function createVaultService(store) {
     // Spec 002, RN-04: senha vazia ou ausente na edição mantém a atual.
     async updateEntry(email, key, id, { site, username, password }) {
       const data = await store.load();
-      const entry = findEntry(data.users[email], id);
+      const entry = findEntry(findUser(data, email), id);
       entry.site = requireText(site, 'site');
       entry.username = requireText(username, 'usuario');
       if (password) entry.secret = encrypt(requirePassword(password), key);
@@ -116,7 +122,7 @@ export function createVaultService(store) {
 
     async removeEntry(email, id) {
       const data = await store.load();
-      const user = data.users[email];
+      const user = findUser(data, email);
       findEntry(user, id);
       user.entries = user.entries.filter((e) => e.id !== id);
       await store.save(data);
@@ -126,7 +132,7 @@ export function createVaultService(store) {
     async findReused(email, key) {
       const data = await store.load();
       const groups = new Map();
-      for (const entry of data.users[email].entries ?? []) {
+      for (const entry of findUser(data, email).entries) {
         const password = decrypt(entry.secret, key);
         if (!groups.has(password)) groups.set(password, []);
         groups.get(password).push(publicEntry(entry));
