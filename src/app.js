@@ -33,7 +33,7 @@ export function createApp({ vaultService, sessions }) {
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
   app.use(contasRoutes({ vaultService, sessions }));
-  app.use(cofreRoutes());
+  app.use(cofreRoutes({ vaultService }));
   app.use(ferramentasRoutes());
 
   app.use((_req, _res, next) => next(new AppError(404, 'Página não encontrada.')));

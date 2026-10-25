@@ -1,4 +1,5 @@
-import { newSalt, deriveKeys, verifyMasterPassword } from '../crypto/vault-crypto.js';
+import { randomUUID } from 'node:crypto';
+import { newSalt, deriveKeys, verifyMasterPassword, encrypt } from '../crypto/vault-crypto.js';
 import { AppError } from '../errors.js';
 
 const MIN_MASTER_PASSWORD = 10;
@@ -41,6 +42,15 @@ export function createVaultService(store) {
         : null;
       if (!key) throw new AppError(401, 'E-mail ou senha mestra inválidos.');
       return { email: normalized, key };
+    },
+
+    async addEntry(email, key, { site, username, password }) {
+      const data = await store.load();
+      const user = data.users[email];
+      user.entries ??= [];
+      const now = new Date().toISOString();
+      user.entries.push({ id: randomUUID(), site, username, secret: encrypt(password, key), createdAt: now, updatedAt: now });
+      await store.save(data);
     },
   };
 }
