@@ -40,6 +40,13 @@ function requirePassword(value) {
 const publicEntry = ({ id, site, username, createdAt, updatedAt }) => ({ id, site, username, createdAt, updatedAt });
 
 export function createVaultService(store) {
+  // Spec 002, RN-07: entrada de outra conta é indistinguível de entrada inexistente.
+  function findEntry(user, id) {
+    const entry = (user.entries ?? []).find((e) => e.id === id);
+    if (!entry) throw new AppError(404, 'Entrada não encontrada.');
+    return entry;
+  }
+
   return {
     async register(email, masterPassword) {
       const normalized = normalizeEmail(email);
@@ -76,8 +83,7 @@ export function createVaultService(store) {
 
     async getEntry(email, key, id) {
       const data = await store.load();
-      const entry = data.users[email].entries.find((e) => e.id === id);
-      if (!entry) throw new AppError(404, 'Entrada não encontrada.');
+      const entry = findEntry(data.users[email], id);
       return { ...publicEntry(entry), password: decrypt(entry.secret, key) };
     },
 
@@ -100,7 +106,7 @@ export function createVaultService(store) {
     // Spec 002, RN-04: senha vazia ou ausente na edição mantém a atual.
     async updateEntry(email, key, id, { site, username, password }) {
       const data = await store.load();
-      const entry = data.users[email].entries.find((e) => e.id === id);
+      const entry = findEntry(data.users[email], id);
       entry.site = requireText(site, 'site');
       entry.username = requireText(username, 'usuario');
       if (password) entry.secret = encrypt(requirePassword(password), key);
@@ -111,6 +117,7 @@ export function createVaultService(store) {
     async removeEntry(email, id) {
       const data = await store.load();
       const user = data.users[email];
+      findEntry(user, id);
       user.entries = user.entries.filter((e) => e.id !== id);
       await store.save(data);
     },
