@@ -50,3 +50,4 @@ A entrada (spec 002) ganha o campo **favorita** (verdadeiro ou falso; no arquivo
 ## 9. Mudanças desde a implementação
 **Sem mudança de comportamento:** RN-01 a RN-04 e CA-01 a CA-06 implementados como escritos.
 - Efeito na spec 002: a lista passou a ter o campo `favorita`. O teste unitário que confere os campos exatos da lista (`test/vault-service.test.js`) foi **atualizado para incluir `favorite`**, mantendo a exigência de que senha e segredo não apareçam.
+- 25/10/2026: retirada junto com a 002 (`2e27d76`) e reaplicada sem mudança de comportamento depois que a 002 foi refeita por TDD. Os testes da 004 voltaram como estavam; não passaram de novo pelo vermelho.

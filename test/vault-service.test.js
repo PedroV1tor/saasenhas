@@ -14,7 +14,8 @@ test('a lista nunca traz a senha nem o segredo cifrado', async () => {
   const { vault, email, key } = await openVault();
   await vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'p' });
   const [entry] = await vault.listEntries(email);
-  assert.deepEqual(Object.keys(entry).sort(), ['createdAt', 'id', 'site', 'updatedAt', 'username']);
+  // `favorite` entrou com a spec 004; senha e segredo continuam fora.
+  assert.deepEqual(Object.keys(entry).sort(), ['createdAt', 'favorite', 'id', 'site', 'updatedAt', 'username']);
 });
 
 test('site e usuário são aparados; a senha não', async () => {
