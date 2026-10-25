@@ -48,9 +48,11 @@ const publicEntry = ({ id, site, username, favorite = false, createdAt, updatedA
 });
 
 export function createVaultService(store) {
+  // Conta que sumiu do arquivo com a sessão aberta vale como sessão inválida (D-06; spec 001, RN-10).
   // Conta recém-criada (spec 001) ainda não tem a lista de entradas: começa vazia.
   function findUser(data, email) {
     const user = data.users[email];
+    if (!user) throw new AppError(401, 'Faça login para acessar o cofre.');
     user.entries ??= [];
     return user;
   }
