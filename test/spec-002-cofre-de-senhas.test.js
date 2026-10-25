@@ -29,7 +29,22 @@ after(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
+const aviso = (html) => html.match(/class="aviso[^"]*"[^>]*>([^<]*)</)?.[1];
 const create = (cookie, entry) => http.post('/cofre/entradas', entry, { cookie });
+
+test('CA-01 entrada nova aparece na lista, sem a senha', async () => {
+  const cookie = await http.signUpAndLogin('ana@exemplo.com');
+  const res = await create(cookie, { site: 'github.com', usuario: 'ana', senha: 's3nh@-forte' });
+  assert.equal(res.status, 303);
+  assert.equal(res.location, '/cofre?aviso=criada');
+  const list = await http.get(res.location, { cookie });
+  assert.equal(aviso(list.html), 'Entrada salva.');
+  // "A lista" é a tabela de entradas (D-05): o título "Cofre de ana@exemplo.com" já contém "ana".
+  const rows = list.html.match(/<tbody>([\s\S]*)<\/tbody>/)?.[1] ?? '';
+  assert.ok(rows.includes('github.com'));
+  assert.ok(rows.includes('ana'));
+  assert.ok(!list.html.includes('s3nh@-forte'));
+});
 
 test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => {
   const cookie = await http.signUpAndLogin('fe@exemplo.com');
