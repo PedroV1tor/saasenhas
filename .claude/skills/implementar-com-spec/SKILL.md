@@ -9,8 +9,9 @@ Siga os passos **na ordem**. Não pule para o código.
 
 1. **Ache a spec.** Procure em `docs/specs/` a spec que cobre o pedido. Se não existir, crie `docs/specs/NNN-nome.md` (próximo número) com objetivo, regras, páginas/rotas e critérios de aceite numerados (CA-xx) no formato **Dado / Quando / Então**, como em `001-contas-e-sessoes.md`.
 2. **Pare se houver dúvida.** Se o pedido for ambíguo ou a spec for nova, mostre a spec ao usuário em até 10 linhas e espere o "ok" antes de seguir.
-3. **Escreva o teste primeiro.** Cada CA-xx vira um teste com o nome começando por `CA-xx`, no arquivo de aceite da spec (`test/spec-NNN-*.test.js`). Regras internas vão em `test/<módulo>.test.js`. Rode `npm test` e confirme que o teste novo **falha pelo motivo certo**.
-4. **Implemente o mínimo.** Altere só os arquivos de `src/`, `views/` e `public/` necessários, no estilo existente (camelCase em inglês no código; campos de formulário, rotas e mensagens em português).
+3. **Escreva o teste primeiro — um CA por vez.** Cada CA-xx vira um teste com o nome começando por `CA-xx`, no arquivo de aceite da spec (`test/spec-NNN-*.test.js`). Regras internas vão em `test/<módulo>.test.js`. Rode `npm test` e confirme que o teste novo **falha pelo motivo certo** (a asserção do comportamento, não um erro de digitação no teste). Commite o vermelho: `test(NNN): … — vermelho (CA-xx)`, só com arquivos de teste. Se o teste já passa, ele nasceu verde: não conta — diga isso e reveja o teste ou a ordem dos CAs.
+4. **Implemente o mínimo.** Altere só os arquivos de `src/`, `views/` e `public/` necessários para **esse** teste passar, no estilo existente (camelCase em inglês no código; campos de formulário, rotas e mensagens em português). Commite o verde: `feat(NNN): … (CA-xx)`. Nunca mude o teste no commit do verde para fazê-lo passar; se o teste estava errado, pare e diga por quê.
+   - **Refatore** com a suíte verde, em commit `refactor(NNN): …` separado. Se algum teste ficar vermelho na refatoração, ela mudou comportamento: desfaça.
 5. **Checklist de segurança** — confirme cada item:
    - senha de entrada só é gravada via `encrypt()`;
    - senha mestra e chave nunca aparecem em log, página, cookie, URL ou arquivo;
