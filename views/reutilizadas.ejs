@@ -1,0 +1,23 @@
+<%- include('partials/topo', { titulo: 'Senhas reutilizadas' }) %>
+<section class="cartao">
+  <p><a href="/cofre">← Voltar ao cofre</a></p>
+  <h1>Senhas reutilizadas</h1>
+  <% if (grupos.length === 0) { %>
+    <p class="aviso aviso-ok" role="status">Nenhuma senha repetida no seu cofre.</p>
+  <% } else { %>
+    <p class="aviso aviso-erro" role="status">Estas contas usam a mesma senha. Se um desses sites vazar, as outras ficam expostas: troque por senhas diferentes.</p>
+    <ul class="grupos">
+    <% for (const entradas of grupos) { %>
+      <li class="grupo">
+        <strong><%= entradas.length %> contas com a mesma senha</strong>
+        <ul>
+        <% for (const entrada of entradas) { %>
+          <li><a href="/cofre/entradas/<%= entrada.id %>"><%= entrada.site %></a> — <%= entrada.username %></li>
+        <% } %>
+        </ul>
+      </li>
+    <% } %>
+    </ul>
+  <% } %>
+</section>
+<%- include('partials/rodape') %>

@@ -40,6 +40,11 @@ export function cofreRoutes({ vaultService }) {
     }
   });
 
+  router.get('/cofre/reutilizadas', async (req, res) => {
+    const grupos = await vaultService.findReused(req.auth.email, req.auth.key);
+    res.render('reutilizadas', { grupos });
+  });
+
   router.get('/cofre/entradas/:id', async (req, res) => {
     const entrada = await vaultService.getEntry(req.auth.email, req.auth.key, req.params.id);
     res.render('entrada', { entrada, aviso: NOTICES[req.query.aviso] });

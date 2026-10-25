@@ -121,5 +121,17 @@ export function createVaultService(store) {
       user.entries = user.entries.filter((e) => e.id !== id);
       await store.save(data);
     },
+
+    // Spec 002, RN-06: agrupa entradas que usam a mesma senha. A senha em si nunca sai daqui.
+    async findReused(email, key) {
+      const data = await store.load();
+      const groups = new Map();
+      for (const entry of data.users[email].entries ?? []) {
+        const password = decrypt(entry.secret, key);
+        if (!groups.has(password)) groups.set(password, []);
+        groups.get(password).push(publicEntry(entry));
+      }
+      return [...groups.values()].filter((entries) => entries.length > 1);
+    },
   };
 }
