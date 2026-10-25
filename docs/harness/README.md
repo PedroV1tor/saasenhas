@@ -14,6 +14,7 @@ Harness usado: **Claude Code**.
 | 7 | Provas (permissão, skill, hook, /context) + leitura honesta | [`evidencias.md`](evidencias.md) | Mostrar que cada peça funciona de verdade, não só que existe |
 | 8 | 2º relatório + comparação | [`relatorio-2.md`](relatorio-2.md) | Medir de novo e comparar com o 1º |
 | 9 | Diário do agente da feature 001 | [`diario-001.md`](diario-001.md) | Registrar autonomia, erros, perguntas e o que mudamos no harness |
+| 10 | Diário da feature 002 por TDD (vermelho → verde → refatorar) | [`diario-002.md`](diario-002.md) | Mostrar que cada comportamento da 002 nasceu de um teste que falhou antes; o hook de commit passou a aceitar o commit do vermelho e a barrar o teste que nasce verde |
 
 ## Antes × depois no git
 - Tag **`aula08`** — spec 001 revisada + `AGENTS.md`, **sem** código, CLAUDE.md, permissões, skill nem hook. É aqui que roda o **1º relatório**.

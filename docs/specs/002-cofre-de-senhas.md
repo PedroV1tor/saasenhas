@@ -82,4 +82,11 @@ Guardar as contas do usuário (site, usuário e senha) num lugar só, com a senh
 | D-06 | Sessão aberta de uma conta que sumiu do arquivo (apagada à mão ou arquivo trocado)? | Vale como sessão inválida: 303 para `/entrar?motivo=login` (spec 001, RN-10). | A versão anterior da 002 fazia isso sem teste; ao refazer por TDD o comportamento sumiu e o caso virou 500. Achado comparando a versão nova com a antiga. |
 
 ## 9. Mudanças desde a implementação
-Reimplementação via TDD em andamento (25/10/2026): a primeira versão (`918bbba`) nasceu num commit só, com teste e código juntos. O código e os testes foram retirados e voltam um critério por vez, com o commit do vermelho antes do verde. As regras e os critérios acima **não mudaram**.
+**Refeita por TDD em 25/10/2026.** A primeira versão (`918bbba`) nasceu num commit só, com teste e código juntos. O código e os testes foram retirados (`2e27d76`) e voltaram um critério por vez: commit do vermelho (só o teste, falhando) e depois o do verde (código mínimo). Ordem: CA-09, CA-06, CA-01, CA-02, CA-03, CA-04, CA-05, CA-08, CA-07. Diário do ciclo: [`diario-002.md`](../harness/diario-002.md).
+
+**Sem mudança de comportamento:** RN-01 a RN-08 e CA-01 a CA-09 continuam como escritos, um teste por CA em `test/spec-002-cofre-de-senhas.test.js`.
+
+**O que mudou:**
+- **D-05 (teste mais rigoroso, sem mudar o comportamento):** o CA-01 agora confere `github.com` e `ana` na tabela de entradas, não na página inteira. Antes, o teste passaria mesmo sem a coluna de usuário.
+- **D-06 (comportamento registrado):** a conta que some do arquivo com a sessão aberta volta para `/entrar?motivo=login`. A versão antiga já fazia isso, mas sem teste; agora há o teste `D-06` e a regra está escrita.
+- `addEntry` e `updateEntry` deixaram de devolver a entrada: nenhuma página usava esse retorno.
