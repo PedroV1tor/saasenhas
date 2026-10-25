@@ -1,7 +1,7 @@
 // Testes de aceite da spec docs/specs/002-cofre-de-senhas.md — um teste por critério (CA-xx).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createApp } from '../src/app.js';
@@ -27,6 +27,16 @@ before(async () => {
 after(async () => {
   http.close();
   await rm(dir, { recursive: true, force: true });
+});
+
+const create = (cookie, entry) => http.post('/cofre/entradas', entry, { cookie });
+
+test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => {
+  const cookie = await http.signUpAndLogin('fe@exemplo.com');
+  await create(cookie, { site: 'w.com', usuario: 'fe', senha: 'senha-que-nao-pode-vazar' });
+  const file = await readFile(dataFile, 'utf8');
+  assert.ok(file.includes('w.com'));
+  assert.ok(!file.includes('senha-que-nao-pode-vazar'));
 });
 
 test('CA-09 páginas do cofre exigem sessão', async () => {
