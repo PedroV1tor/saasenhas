@@ -14,6 +14,28 @@ function normalizeEmail(email) {
   return normalized;
 }
 
+// Spec 002, RN-02: site e usuário obrigatórios, aparados, até 200 caracteres.
+function requireText(value, field, max = 200) {
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new AppError(400, `O campo "${field}" é obrigatório.`);
+  }
+  if (value.trim().length > max) {
+    throw new AppError(400, `O campo "${field}" aceita no máximo ${max} caracteres.`);
+  }
+  return value.trim();
+}
+
+// Spec 002, RN-03: a senha é guardada exatamente como digitada; aparar mudaria a credencial do usuário.
+function requirePassword(value) {
+  if (typeof value !== 'string' || value === '') {
+    throw new AppError(400, 'O campo "senha" é obrigatório.');
+  }
+  if (value.length > 512) {
+    throw new AppError(400, 'O campo "senha" aceita no máximo 512 caracteres.');
+  }
+  return value;
+}
+
 // O que sai do serviço para as páginas: nunca o segredo cifrado (spec 002, RN-05).
 const publicEntry = ({ id, site, username, createdAt, updatedAt }) => ({ id, site, username, createdAt, updatedAt });
 
@@ -63,7 +85,14 @@ export function createVaultService(store) {
       const user = data.users[email];
       user.entries ??= [];
       const now = new Date().toISOString();
-      user.entries.push({ id: randomUUID(), site, username, secret: encrypt(password, key), createdAt: now, updatedAt: now });
+      user.entries.push({
+        id: randomUUID(),
+        site: requireText(site, 'site'),
+        username: requireText(username, 'usuario'),
+        secret: encrypt(requirePassword(password), key),
+        createdAt: now,
+        updatedAt: now,
+      });
       await store.save(data);
     },
   };

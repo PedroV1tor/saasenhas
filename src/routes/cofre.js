@@ -1,24 +1,41 @@
 import { Router } from 'express';
 import { requireSession } from '../auth/session-middleware.js';
+import { AppError } from '../errors.js';
 
 // Avisos da lista e do detalhe (spec 002, seção 4).
 const NOTICES = {
   criada: 'Entrada salva.',
 };
 
+const text = (value) => (typeof value === 'string' ? value : '');
+
 export function cofreRoutes({ vaultService }) {
   const router = Router();
   router.use('/cofre', requireSession);
+
+  // Spec 002, RN-08: o formulário com erro volta com site e usuário; a senha não volta.
+  function renderFormError(res, err, form) {
+    if (!(err instanceof AppError) || err.status !== 400) throw err;
+    res.status(400).render('entrada-form', { ...form, erro: err.message });
+  }
 
   router.get('/cofre', async (req, res) => {
     const entradas = await vaultService.listEntries(req.auth.email);
     res.render('cofre', { email: req.auth.email, entradas, aviso: NOTICES[req.query.aviso] });
   });
 
+  router.get('/cofre/nova', (_req, res) => {
+    res.render('entrada-form', { id: null, site: '', usuario: '' });
+  });
+
   router.post('/cofre/entradas', async (req, res) => {
     const { site, usuario, senha } = req.body ?? {};
-    await vaultService.addEntry(req.auth.email, req.auth.key, { site, username: usuario, password: senha });
-    res.redirect(303, '/cofre?aviso=criada');
+    try {
+      await vaultService.addEntry(req.auth.email, req.auth.key, { site, username: usuario, password: senha });
+      res.redirect(303, '/cofre?aviso=criada');
+    } catch (err) {
+      renderFormError(res, err, { id: null, site: text(site), usuario: text(usuario) });
+    }
   });
 
   router.get('/cofre/entradas/:id', async (req, res) => {

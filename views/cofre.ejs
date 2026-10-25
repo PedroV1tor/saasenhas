@@ -2,10 +2,13 @@
 <section class="cartao">
   <div class="cabecalho-pagina">
     <h1>Cofre de <%= email %></h1>
+    <div class="acoes">
+      <a class="botao" href="/cofre/nova">Nova entrada</a>
+    </div>
   </div>
   <% if (locals.aviso) { %><p class="aviso aviso-ok" role="status"><%= aviso %></p><% } %>
   <% if (entradas.length === 0) { %>
-    <p class="vazio">Seu cofre ainda está vazio.</p>
+    <p class="vazio">Seu cofre ainda está vazio. Comece por <a href="/cofre/nova">uma nova entrada</a>.</p>
   <% } else { %>
     <table>
       <thead><tr><th>Site</th><th>Usuário</th><th>Atualizada em</th><th></th></tr></thead>
