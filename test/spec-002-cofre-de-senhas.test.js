@@ -1,7 +1,7 @@
 // Testes de aceite da spec docs/specs/002-cofre-de-senhas.md — um teste por critério (CA-xx).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createApp } from '../src/app.js';
@@ -149,4 +149,14 @@ test('CA-09 páginas do cofre exigem sessão', async () => {
     assert.equal(res.status, 303);
     assert.equal(res.location, '/entrar?motivo=login');
   }
+});
+
+test('D-06 conta que sumiu do arquivo com a sessão aberta volta para a entrada', async () => {
+  const cookie = await http.signUpAndLogin('jo@exemplo.com');
+  const data = JSON.parse(await readFile(dataFile, 'utf8'));
+  delete data.users['jo@exemplo.com'];
+  await writeFile(dataFile, JSON.stringify(data));
+  const res = await http.get('/cofre', { cookie });
+  assert.equal(res.status, 303);
+  assert.equal(res.location, '/entrar?motivo=login');
 });
