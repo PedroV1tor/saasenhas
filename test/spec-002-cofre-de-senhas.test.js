@@ -61,6 +61,20 @@ test('CA-02 o detalhe mostra a senha exatamente como digitada', async () => {
   assert.equal(shownPassword(detail.html), '  com espaços  ');
 });
 
+test('CA-03 campos obrigatórios e tamanho máximo', async () => {
+  const cookie = await http.signUpAndLogin('caio@exemplo.com');
+  const cases = [
+    [{ site: '', usuario: 'caio', senha: 'x' }, 'O campo "site" é obrigatório.'],
+    [{ site: 'a.com', usuario: 'caio', senha: '' }, 'O campo "senha" é obrigatório.'],
+    [{ site: 's'.repeat(201), usuario: 'caio', senha: 'x' }, 'O campo "site" aceita no máximo 200 caracteres.'],
+  ];
+  for (const [entry, message] of cases) {
+    const res = await create(cookie, entry);
+    assert.equal(res.status, 400);
+    assert.equal(aviso(res.html).replaceAll('&#34;', '"'), message);
+  }
+});
+
 test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => {
   const cookie = await http.signUpAndLogin('fe@exemplo.com');
   await create(cookie, { site: 'w.com', usuario: 'fe', senha: 'senha-que-nao-pode-vazar' });

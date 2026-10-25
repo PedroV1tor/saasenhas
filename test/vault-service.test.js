@@ -17,6 +17,24 @@ test('a lista nunca traz a senha nem o segredo cifrado', async () => {
   assert.deepEqual(Object.keys(entry).sort(), ['createdAt', 'id', 'site', 'updatedAt', 'username']);
 });
 
+test('site e usuário são aparados; a senha não', async () => {
+  const { vault, email, key } = await openVault();
+  await vault.addEntry(email, key, { site: '  a.com ', username: ' ana ', password: ' p ' });
+  const [{ id }] = await vault.listEntries(email);
+  const entry = await vault.getEntry(email, key, id);
+  assert.equal(entry.site, 'a.com');
+  assert.equal(entry.username, 'ana');
+  assert.equal(entry.password, ' p ');
+});
+
+test('senha com mais de 512 caracteres é recusada', async () => {
+  const { vault, email, key } = await openVault();
+  await assert.rejects(
+    vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'x'.repeat(513) }),
+    { status: 400, message: 'O campo "senha" aceita no máximo 512 caracteres.' },
+  );
+});
+
 test('a mesma senha cifrada duas vezes gera segredos diferentes (IV aleatório)', async () => {
   const store = createMemoryStore();
   const vault = createVaultService(store);
