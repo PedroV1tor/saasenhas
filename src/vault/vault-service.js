@@ -95,5 +95,16 @@ export function createVaultService(store) {
       });
       await store.save(data);
     },
+
+    // Spec 002, RN-04: senha vazia ou ausente na edição mantém a atual.
+    async updateEntry(email, key, id, { site, username, password }) {
+      const data = await store.load();
+      const entry = data.users[email].entries.find((e) => e.id === id);
+      entry.site = requireText(site, 'site');
+      entry.username = requireText(username, 'usuario');
+      if (password) entry.secret = encrypt(requirePassword(password), key);
+      entry.updatedAt = new Date().toISOString();
+      await store.save(data);
+    },
   };
 }

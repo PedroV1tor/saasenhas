@@ -5,6 +5,7 @@ import { AppError } from '../errors.js';
 // Avisos da lista e do detalhe (spec 002, seção 4).
 const NOTICES = {
   criada: 'Entrada salva.',
+  salva: 'Alterações salvas.',
 };
 
 const text = (value) => (typeof value === 'string' ? value : '');
@@ -41,6 +42,22 @@ export function cofreRoutes({ vaultService }) {
   router.get('/cofre/entradas/:id', async (req, res) => {
     const entrada = await vaultService.getEntry(req.auth.email, req.auth.key, req.params.id);
     res.render('entrada', { entrada, aviso: NOTICES[req.query.aviso] });
+  });
+
+  router.get('/cofre/entradas/:id/editar', async (req, res) => {
+    const { id, site, username } = await vaultService.getEntry(req.auth.email, req.auth.key, req.params.id);
+    res.render('entrada-form', { id, site, usuario: username });
+  });
+
+  router.post('/cofre/entradas/:id', async (req, res) => {
+    const { site, usuario, senha } = req.body ?? {};
+    const { id } = req.params;
+    try {
+      await vaultService.updateEntry(req.auth.email, req.auth.key, id, { site, username: usuario, password: senha });
+      res.redirect(303, `/cofre/entradas/${id}?aviso=salva`);
+    } catch (err) {
+      renderFormError(res, err, { id, site: text(site), usuario: text(usuario) });
+    }
   });
 
   return router;
