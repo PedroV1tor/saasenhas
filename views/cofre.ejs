@@ -3,6 +3,22 @@
   <div class="cabecalho-pagina">
     <h1>Cofre de <%= email %></h1>
   </div>
-  <p class="vazio">Seu cofre ainda está vazio.</p>
+  <% if (locals.aviso) { %><p class="aviso aviso-ok" role="status"><%= aviso %></p><% } %>
+  <% if (entradas.length === 0) { %>
+    <p class="vazio">Seu cofre ainda está vazio.</p>
+  <% } else { %>
+    <table>
+      <thead><tr><th>Site</th><th>Usuário</th><th>Atualizada em</th></tr></thead>
+      <tbody>
+      <% for (const entrada of entradas) { %>
+        <tr>
+          <td><%= entrada.site %></td>
+          <td><%= entrada.username %></td>
+          <td><%= new Date(entrada.updatedAt).toLocaleDateString('pt-BR') %></td>
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  <% } %>
 </section>
 <%- include('partials/rodape') %>

@@ -14,6 +14,9 @@ function normalizeEmail(email) {
   return normalized;
 }
 
+// O que sai do serviço para as páginas: nunca o segredo cifrado (spec 002, RN-05).
+const publicEntry = ({ id, site, username, createdAt, updatedAt }) => ({ id, site, username, createdAt, updatedAt });
+
 export function createVaultService(store) {
   return {
     async register(email, masterPassword) {
@@ -42,6 +45,11 @@ export function createVaultService(store) {
         : null;
       if (!key) throw new AppError(401, 'E-mail ou senha mestra inválidos.');
       return { email: normalized, key };
+    },
+
+    async listEntries(email) {
+      const data = await store.load();
+      return (data.users[email].entries ?? []).map(publicEntry);
     },
 
     async addEntry(email, key, { site, username, password }) {
