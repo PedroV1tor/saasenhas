@@ -91,6 +91,17 @@ test('CA-04 editar com a senha em branco mantém a senha; com senha nova, troca'
   assert.equal(shownPassword((await http.get(`/cofre/entradas/${id}`, { cookie })).html), 'senha-nova');
 });
 
+test('CA-05 excluir remove a entrada', async () => {
+  const cookie = await http.signUpAndLogin('edu@exemplo.com');
+  const id = await createAndGetId(cookie, { site: 'z.com', usuario: 'edu', senha: 'x' });
+  const res = await http.post(`/cofre/entradas/${id}/excluir`, {}, { cookie });
+  assert.equal(res.status, 303);
+  assert.equal(res.location, '/cofre?aviso=excluida');
+  const detail = await http.get(`/cofre/entradas/${id}`, { cookie });
+  assert.equal(detail.status, 404);
+  assert.equal(aviso(detail.html), 'Entrada não encontrada.');
+});
+
 test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => {
   const cookie = await http.signUpAndLogin('fe@exemplo.com');
   await create(cookie, { site: 'w.com', usuario: 'fe', senha: 'senha-que-nao-pode-vazar' });
