@@ -79,6 +79,7 @@ Guardar as contas do usuário (site, usuário e senha) num lugar só, com a senh
 | D-03 | Na edição, como saber se o usuário quer trocar a senha? | Campo vazio mantém a atual (RN-04). | Não colocar a senha atual no HTML do formulário de edição. |
 | D-04 | Entrada de outra conta: 403 ou 404? | 404 (RN-07). | 403 confirmaria que o id existe. |
 | D-05 | No CA-01, "a lista mostra `ana`" vale para a página inteira ou para a tabela? | Para a tabela de entradas. | Achado no vermelho do CA-01: o título "Cofre de ana@exemplo.com" já contém `ana`, e o teste passaria sem a coluna de usuário. |
+| D-06 | Sessão aberta de uma conta que sumiu do arquivo (apagada à mão ou arquivo trocado)? | Vale como sessão inválida: 303 para `/entrar?motivo=login` (spec 001, RN-10). | A versão anterior da 002 fazia isso sem teste; ao refazer por TDD o comportamento sumiu e o caso virou 500. Achado comparando a versão nova com a antiga. |
 
 ## 9. Mudanças desde a implementação
 Reimplementação via TDD em andamento (25/10/2026): a primeira versão (`918bbba`) nasceu num commit só, com teste e código juntos. O código e os testes foram retirados e voltam um critério por vez, com o commit do vermelho antes do verde. As regras e os critérios acima **não mudaram**.
