@@ -30,7 +30,14 @@ after(async () => {
 });
 
 const aviso = (html) => html.match(/class="aviso[^"]*"[^>]*>([^<]*)</)?.[1];
+const shownPassword = (html) => html.match(/<input[^>]*id="senha"[^>]*value="([^"]*)"/)?.[1];
 const create = (cookie, entry) => http.post('/cofre/entradas', entry, { cookie });
+// Cria a entrada e devolve o id dela (o último link de detalhe da lista).
+async function createAndGetId(cookie, entry) {
+  await create(cookie, entry);
+  const ids = [...(await http.get('/cofre', { cookie })).html.matchAll(/href="\/cofre\/entradas\/([\w-]+)"/g)];
+  return ids.at(-1)[1];
+}
 
 test('CA-01 entrada nova aparece na lista, sem a senha', async () => {
   const cookie = await http.signUpAndLogin('ana@exemplo.com');
@@ -44,6 +51,14 @@ test('CA-01 entrada nova aparece na lista, sem a senha', async () => {
   assert.ok(rows.includes('github.com'));
   assert.ok(rows.includes('ana'));
   assert.ok(!list.html.includes('s3nh@-forte'));
+});
+
+test('CA-02 o detalhe mostra a senha exatamente como digitada', async () => {
+  const cookie = await http.signUpAndLogin('bia@exemplo.com');
+  const id = await createAndGetId(cookie, { site: 'x.com', usuario: 'bia', senha: '  com espaços  ' });
+  const detail = await http.get(`/cofre/entradas/${id}`, { cookie });
+  assert.equal(detail.status, 200);
+  assert.equal(shownPassword(detail.html), '  com espaços  ');
 });
 
 test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => {
