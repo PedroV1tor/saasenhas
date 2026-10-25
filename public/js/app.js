@@ -18,3 +18,8 @@ document.addEventListener('click', (event) => {
     });
   }
 });
+
+document.addEventListener('submit', (event) => {
+  const message = event.target.dataset.confirmar;
+  if (message && !window.confirm(message)) event.preventDefault();
+});

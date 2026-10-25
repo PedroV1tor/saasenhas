@@ -17,6 +17,9 @@
   </div>
   <div class="acoes">
     <a class="botao" href="/cofre/entradas/<%= entrada.id %>/editar">Editar</a>
+    <form method="post" action="/cofre/entradas/<%= entrada.id %>/excluir" data-confirmar="Excluir esta entrada?">
+      <button class="botao botao-perigo" type="submit">Excluir</button>
+    </form>
   </div>
 </section>
 <%- include('partials/rodape') %>

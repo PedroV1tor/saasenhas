@@ -77,6 +77,7 @@ export function createVaultService(store) {
     async getEntry(email, key, id) {
       const data = await store.load();
       const entry = data.users[email].entries.find((e) => e.id === id);
+      if (!entry) throw new AppError(404, 'Entrada não encontrada.');
       return { ...publicEntry(entry), password: decrypt(entry.secret, key) };
     },
 
@@ -104,6 +105,13 @@ export function createVaultService(store) {
       entry.username = requireText(username, 'usuario');
       if (password) entry.secret = encrypt(requirePassword(password), key);
       entry.updatedAt = new Date().toISOString();
+      await store.save(data);
+    },
+
+    async removeEntry(email, id) {
+      const data = await store.load();
+      const user = data.users[email];
+      user.entries = user.entries.filter((e) => e.id !== id);
       await store.save(data);
     },
   };

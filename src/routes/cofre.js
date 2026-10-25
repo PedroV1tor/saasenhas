@@ -6,6 +6,7 @@ import { AppError } from '../errors.js';
 const NOTICES = {
   criada: 'Entrada salva.',
   salva: 'Alterações salvas.',
+  excluida: 'Entrada excluída.',
 };
 
 const text = (value) => (typeof value === 'string' ? value : '');
@@ -58,6 +59,11 @@ export function cofreRoutes({ vaultService }) {
     } catch (err) {
       renderFormError(res, err, { id, site: text(site), usuario: text(usuario) });
     }
+  });
+
+  router.post('/cofre/entradas/:id/excluir', async (req, res) => {
+    await vaultService.removeEntry(req.auth.email, req.params.id);
+    res.redirect(303, '/cofre?aviso=excluida');
   });
 
   return router;
