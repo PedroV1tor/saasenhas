@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { newSalt, deriveKeys, verifyMasterPassword, encrypt } from '../crypto/vault-crypto.js';
+import { newSalt, deriveKeys, verifyMasterPassword, encrypt, decrypt } from '../crypto/vault-crypto.js';
 import { AppError } from '../errors.js';
 
 const MIN_MASTER_PASSWORD = 10;
@@ -50,6 +50,12 @@ export function createVaultService(store) {
     async listEntries(email) {
       const data = await store.load();
       return (data.users[email].entries ?? []).map(publicEntry);
+    },
+
+    async getEntry(email, key, id) {
+      const data = await store.load();
+      const entry = data.users[email].entries.find((e) => e.id === id);
+      return { ...publicEntry(entry), password: decrypt(entry.secret, key) };
     },
 
     async addEntry(email, key, { site, username, password }) {

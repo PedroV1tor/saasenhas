@@ -8,13 +8,14 @@
     <p class="vazio">Seu cofre ainda está vazio.</p>
   <% } else { %>
     <table>
-      <thead><tr><th>Site</th><th>Usuário</th><th>Atualizada em</th></tr></thead>
+      <thead><tr><th>Site</th><th>Usuário</th><th>Atualizada em</th><th></th></tr></thead>
       <tbody>
       <% for (const entrada of entradas) { %>
         <tr>
           <td><%= entrada.site %></td>
           <td><%= entrada.username %></td>
           <td><%= new Date(entrada.updatedAt).toLocaleDateString('pt-BR') %></td>
+          <td><a href="/cofre/entradas/<%= entrada.id %>">Ver</a></td>
         </tr>
       <% } %>
       </tbody>

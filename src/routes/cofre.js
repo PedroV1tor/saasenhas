@@ -21,5 +21,10 @@ export function cofreRoutes({ vaultService }) {
     res.redirect(303, '/cofre?aviso=criada');
   });
 
+  router.get('/cofre/entradas/:id', async (req, res) => {
+    const entrada = await vaultService.getEntry(req.auth.email, req.auth.key, req.params.id);
+    res.render('entrada', { entrada, aviso: NOTICES[req.query.aviso] });
+  });
+
   return router;
 }

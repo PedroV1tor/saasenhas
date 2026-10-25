@@ -1,0 +1,19 @@
+<%- include('partials/topo', { titulo: entrada.site }) %>
+<section class="cartao cartao-estreito">
+  <p><a href="/cofre">← Voltar ao cofre</a></p>
+  <h1><%= entrada.site %></h1>
+  <% if (locals.aviso) { %><p class="aviso aviso-ok" role="status"><%= aviso %></p><% } %>
+  <div class="campo">
+    <label for="usuario">Usuário</label>
+    <input type="text" id="usuario" value="<%= entrada.username %>" readonly>
+  </div>
+  <div class="campo">
+    <label for="senha">Senha</label>
+    <input type="password" id="senha" value="<%= entrada.password %>" readonly>
+    <div class="acoes">
+      <button class="botao botao-pequeno botao-secundario" type="button" data-alternar="senha">Mostrar</button>
+      <button class="botao botao-pequeno botao-secundario" type="button" data-copiar="senha">Copiar</button>
+    </div>
+  </div>
+</section>
+<%- include('partials/rodape') %>

@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync, timingSafeEqual, createCipheriv } from 'node:crypto';
+import { randomBytes, scryptSync, timingSafeEqual, createCipheriv, createDecipheriv } from 'node:crypto';
 
 // scrypt: N=2^15 deixa cada derivação entre ~60 e ~100 ms, conforme a máquina, o que encarece ataques de força bruta.
 const SCRYPT_OPTIONS = { N: 2 ** 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
@@ -33,4 +33,11 @@ export function encrypt(plaintext, key) {
   const cipher = createCipheriv(ALGORITHM, key, iv);
   const data = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
   return [iv, cipher.getAuthTag(), data].map((part) => part.toString('base64')).join('.');
+}
+
+export function decrypt(payload, key) {
+  const [iv, tag, data] = payload.split('.').map((part) => Buffer.from(part, 'base64'));
+  const decipher = createDecipheriv(ALGORITHM, key, iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
 }
