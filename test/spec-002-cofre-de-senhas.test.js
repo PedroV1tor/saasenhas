@@ -75,6 +75,22 @@ test('CA-03 campos obrigatórios e tamanho máximo', async () => {
   }
 });
 
+test('CA-04 editar com a senha em branco mantém a senha; com senha nova, troca', async () => {
+  const cookie = await http.signUpAndLogin('dani@exemplo.com');
+  const id = await createAndGetId(cookie, { site: 'y.com', usuario: 'dani', senha: 'senha-antiga' });
+
+  const keep = await http.post(`/cofre/entradas/${id}`, { site: 'y.com', usuario: 'dani2', senha: '' }, { cookie });
+  assert.equal(keep.status, 303);
+  assert.equal(keep.location, `/cofre/entradas/${id}?aviso=salva`);
+  const afterKeep = await http.get(keep.location, { cookie });
+  assert.equal(aviso(afterKeep.html), 'Alterações salvas.');
+  assert.ok(afterKeep.html.includes('dani2'));
+  assert.equal(shownPassword(afterKeep.html), 'senha-antiga');
+
+  await http.post(`/cofre/entradas/${id}`, { site: 'y.com', usuario: 'dani2', senha: 'senha-nova' }, { cookie });
+  assert.equal(shownPassword((await http.get(`/cofre/entradas/${id}`, { cookie })).html), 'senha-nova');
+});
+
 test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => {
   const cookie = await http.signUpAndLogin('fe@exemplo.com');
   await create(cookie, { site: 'w.com', usuario: 'fe', senha: 'senha-que-nao-pode-vazar' });
