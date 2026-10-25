@@ -1,5 +1,4 @@
-import { randomUUID } from 'node:crypto';
-import { newSalt, deriveKeys, verifyMasterPassword, encrypt, decrypt } from '../crypto/vault-crypto.js';
+import { newSalt, deriveKeys, verifyMasterPassword } from '../crypto/vault-crypto.js';
 import { AppError } from '../errors.js';
 
 const MIN_MASTER_PASSWORD = 10;
@@ -14,55 +13,7 @@ function normalizeEmail(email) {
   return normalized;
 }
 
-// Spec 002, RN-02: site e usuário obrigatórios, aparados, até 200 caracteres.
-function requireText(value, field, max = 200) {
-  if (typeof value !== 'string' || value.trim() === '') {
-    throw new AppError(400, `O campo "${field}" é obrigatório.`);
-  }
-  if (value.trim().length > max) {
-    throw new AppError(400, `O campo "${field}" aceita no máximo ${max} caracteres.`);
-  }
-  return value.trim();
-}
-
-// Spec 002, RN-03: a senha é guardada exatamente como digitada; aparar mudaria a credencial do usuário.
-function requirePassword(value) {
-  if (typeof value !== 'string' || value === '') {
-    throw new AppError(400, 'O campo "senha" é obrigatório.');
-  }
-  if (value.length > 512) {
-    throw new AppError(400, 'O campo "senha" aceita no máximo 512 caracteres.');
-  }
-  return value;
-}
-
-// O que sai do serviço para as páginas: nunca o segredo cifrado.
-// Spec 004, RN-01: entrada gravada antes das favoritas não tem o campo e vale false.
-const publicEntry = ({ id, site, username, favorite = false, createdAt, updatedAt }) => ({
-  id,
-  site,
-  username,
-  favorite,
-  createdAt,
-  updatedAt,
-});
-
 export function createVaultService(store) {
-  // Conta apagada do arquivo com a sessão ainda aberta: trata como sessão inválida (spec 001, RN-10).
-  function findUser(data, email) {
-    const user = data.users[email];
-    if (!user) throw new AppError(401, 'Faça login para acessar o cofre.');
-    user.entries ??= [];
-    return user;
-  }
-
-  // Spec 002, RN-07: entrada de outra conta é indistinguível de entrada inexistente.
-  function findEntry(user, id) {
-    const entry = user.entries.find((e) => e.id === id);
-    if (!entry) throw new AppError(404, 'Entrada não encontrada.');
-    return entry;
-  }
-
   return {
     async register(email, masterPassword) {
       const normalized = normalizeEmail(email);
@@ -90,78 +41,6 @@ export function createVaultService(store) {
         : null;
       if (!key) throw new AppError(401, 'E-mail ou senha mestra inválidos.');
       return { email: normalized, key };
-    },
-
-    async listEntries(email, { favoritesOnly = false } = {}) {
-      const data = await store.load();
-      const entries = findUser(data, email).entries.map(publicEntry);
-      return favoritesOnly ? entries.filter((e) => e.favorite) : entries;
-    },
-
-    async getEntry(email, key, id) {
-      const data = await store.load();
-      const entry = findEntry(findUser(data, email), id);
-      return { ...publicEntry(entry), password: decrypt(entry.secret, key) };
-    },
-
-    async addEntry(email, key, { site, username, password, favorite = false }) {
-      const data = await store.load();
-      const user = findUser(data, email);
-      const now = new Date().toISOString();
-      const entry = {
-        id: randomUUID(),
-        site: requireText(site, 'site'),
-        username: requireText(username, 'usuario'),
-        secret: encrypt(requirePassword(password), key),
-        favorite,
-        createdAt: now,
-        updatedAt: now,
-      };
-      user.entries.push(entry);
-      await store.save(data);
-      return publicEntry(entry);
-    },
-
-    // Spec 002, RN-04: senha vazia ou ausente na edição mantém a atual.
-    async updateEntry(email, key, id, { site, username, password, favorite = false }) {
-      const data = await store.load();
-      const entry = findEntry(findUser(data, email), id);
-      entry.site = requireText(site, 'site');
-      entry.username = requireText(username, 'usuario');
-      if (password) entry.secret = encrypt(requirePassword(password), key);
-      entry.favorite = favorite;
-      entry.updatedAt = new Date().toISOString();
-      await store.save(data);
-      return publicEntry(entry);
-    },
-
-    // Spec 004, RN-03: só a favorita muda; site, usuário e senha ficam como estão.
-    async setFavorite(email, id, favorite) {
-      const data = await store.load();
-      const entry = findEntry(findUser(data, email), id);
-      entry.favorite = favorite;
-      entry.updatedAt = new Date().toISOString();
-      await store.save(data);
-    },
-
-    async removeEntry(email, id) {
-      const data = await store.load();
-      const user = findUser(data, email);
-      findEntry(user, id);
-      user.entries = user.entries.filter((e) => e.id !== id);
-      await store.save(data);
-    },
-
-    // Spec 002, RN-06: agrupa entradas que usam a mesma senha. A senha em si nunca sai daqui.
-    async findReused(email, key) {
-      const data = await store.load();
-      const groups = new Map();
-      for (const entry of findUser(data, email).entries) {
-        const password = decrypt(entry.secret, key);
-        if (!groups.has(password)) groups.set(password, []);
-        groups.get(password).push(publicEntry(entry));
-      }
-      return [...groups.values()].filter((entries) => entries.length > 1);
     },
   };
 }
