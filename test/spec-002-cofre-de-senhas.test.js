@@ -110,6 +110,25 @@ test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => 
   assert.ok(!file.includes('senha-que-nao-pode-vazar'));
 });
 
+test('CA-08 uma conta não vê, não edita e não exclui a entrada de outra', async () => {
+  const owner = await http.signUpAndLogin('hana@exemplo.com');
+  const intruder = await http.signUpAndLogin('ivo@exemplo.com');
+  const id = await createAndGetId(owner, { site: 'banco.com', usuario: 'hana', senha: 'segredo-da-hana' });
+  const attempts = [
+    await http.get(`/cofre/entradas/${id}`, { cookie: intruder }),
+    await http.get(`/cofre/entradas/${id}/editar`, { cookie: intruder }),
+    await http.post(`/cofre/entradas/${id}`, { site: 'h4ck', usuario: 'ivo', senha: '' }, { cookie: intruder }),
+    await http.post(`/cofre/entradas/${id}/excluir`, {}, { cookie: intruder }),
+  ];
+  for (const res of attempts) {
+    assert.equal(res.status, 404);
+    assert.equal(aviso(res.html), 'Entrada não encontrada.');
+  }
+  const detail = await http.get(`/cofre/entradas/${id}`, { cookie: owner });
+  assert.ok(detail.html.includes('banco.com'));
+  assert.equal(shownPassword(detail.html), 'segredo-da-hana');
+});
+
 test('CA-09 páginas do cofre exigem sessão', async () => {
   for (const res of [await http.get('/cofre/nova'), await http.post('/cofre/entradas', { site: 'a', usuario: 'b', senha: 'c' })]) {
     assert.equal(res.status, 303);
