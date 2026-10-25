@@ -45,3 +45,9 @@ test('a mesma senha cifrada duas vezes gera segredos diferentes (IV aleatório)'
   const [first, second] = (await store.load()).users[email].entries;
   assert.notEqual(first.secret, second.secret);
 });
+
+test('reutilizadas ignora senhas usadas uma vez só', async () => {
+  const { vault, email, key } = await openVault();
+  await vault.addEntry(email, key, { site: 'a.com', username: 'ana', password: 'unica' });
+  assert.deepEqual(await vault.findReused(email, key), []);
+});

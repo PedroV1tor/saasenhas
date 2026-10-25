@@ -110,6 +110,21 @@ test('CA-06 o arquivo do cofre não contém a senha em texto puro', async () => 
   assert.ok(!file.includes('senha-que-nao-pode-vazar'));
 });
 
+test('CA-07 reutilizadas agrupa entradas de mesma senha sem mostrar a senha', async () => {
+  const cookie = await http.signUpAndLogin('gil@exemplo.com');
+  await create(cookie, { site: 'a.com', usuario: 'gil', senha: 'repetida-123' });
+  await create(cookie, { site: 'b.com', usuario: 'gil', senha: 'repetida-123' });
+  await create(cookie, { site: 'c.com', usuario: 'gil', senha: 'outra-senha' });
+  const page = await http.get('/cofre/reutilizadas', { cookie });
+  assert.equal(page.status, 200);
+  // Cada grupo vai de <li class="grupo"> até o </ul> da lista interna de contas.
+  const groups = [...page.html.matchAll(/<li class="grupo">([\s\S]*?)<\/ul>/g)].map((m) => m[1]);
+  assert.equal(groups.length, 1);
+  assert.ok(groups[0].includes('a.com') && groups[0].includes('b.com'));
+  assert.ok(!page.html.includes('c.com'));
+  assert.ok(!page.html.includes('repetida-123'));
+});
+
 test('CA-08 uma conta não vê, não edita e não exclui a entrada de outra', async () => {
   const owner = await http.signUpAndLogin('hana@exemplo.com');
   const intruder = await http.signUpAndLogin('ivo@exemplo.com');
